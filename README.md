@@ -1,17 +1,59 @@
-# Finance Tracker
+# FamilyTrack
 
-A new Flutter project.
+Family spending tracker with shared budgets.
 
-## Getting Started
+```
+familytrack/
+├── mobile/    Flutter app (iOS + Android)
+└── backend/   Node.js + Express + TypeScript API for syncing family groups
+```
 
-This project is a starting point for a Flutter application.
+## Run the app
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+cd mobile
+flutter pub get
+flutter run
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Run the API
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Needs Node.js 22.13 or newer (uses the built-in `node:sqlite`).
+
+```bash
+cd backend
+npm install
+cp .env.example .env   # then set JWT_SECRET
+npm run dev            # http://localhost:3000
+npm test
+```
+
+See [backend/README.md](backend/README.md) for the endpoints.
+
+## Connecting the app to the API
+
+Everything lives on the API, so the app asks you to sign in first:
+
+1. Start the API (`npm run dev` in `backend/`).
+2. Open the app → **Create Account** → **Create Family** (or **Join
+   Family** with someone's invite code).
+3. Share the invite code from the **Family** tab; others sign up and join.
+
+The app keeps a copy on the phone, so it still works offline and uploads
+changes once it's back online.
+
+Changes upload about a second after they're made. The family's changes download
+on launch, when the app comes back to the foreground, every minute, and on
+pull-to-refresh in the Family tab.
+
+Default server address: `http://localhost:3000/api` (iOS simulator) or
+`http://10.0.2.2:3000/api` (Android emulator). On a real phone, set your
+computer's Wi-Fi address under **Profile → Server**, or run
+`flutter run --dart-define=API_URL=http://<your-ip>:3000/api`.
+
+Sync test against a running API (covers every feature end to end):
+
+```bash
+cd backend && PORT=3100 npm run dev
+cd mobile && API_URL=http://localhost:3100/api flutter test test/sync_integration_test.dart
+```
