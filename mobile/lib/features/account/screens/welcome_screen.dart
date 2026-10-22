@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/api/api_client.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/core/widgets/form_sheet.dart';
@@ -11,8 +12,8 @@ import 'package:finance_tracker/core/widgets/sheet_parts.dart';
 import 'package:finance_tracker/features/account/providers/session_provider.dart';
 import 'package:finance_tracker/features/account/screens/account_screen.dart';
 
-const _blue = Color(0xFF1F7AEC);
-const _fieldBorder = Color(0xFFD6E6FA);
+const _blue = AppColors.forest;
+const _fieldBorder = Color(0xFFE2E2EE);
 
 /// First screen when signed out: log in, or switch to creating an account.
 class WelcomeScreen extends StatefulWidget {
@@ -76,20 +77,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     }
   }
 
-  void _social(String provider) => showFormSheet(
-    context,
-    title: 'Continue with $provider',
-    subtitle:
-        '$provider sign-in needs the app’s $provider developer keys, which '
-        'aren’t set up yet. Use your email for now.',
-    child: Builder(
-      builder: (c) => SheetPrimaryButton(
-        label: 'Use email instead',
-        onPressed: () => Navigator.of(c).pop(),
-      ),
-    ),
-  );
-
   void _forgotPassword() => showFormSheet(
     context,
     title: 'Forgot password?',
@@ -113,7 +100,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         statusBarColor: Colors.transparent,
       ),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF3F8FE),
+        backgroundColor: AppColors.background,
         body: Stack(
           children: [
             const Positioned.fill(child: _SoftBackground()),
@@ -127,33 +114,37 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             ListView(
               padding: EdgeInsets.fromLTRB(
                 24,
-                pad.top + 34,
+                pad.top + 64,
                 24,
                 pad.bottom + 16,
               ),
               children: [
                 ShaderMask(
                   shaderCallback: (r) => const LinearGradient(
-                    colors: [Color(0xFF1565E0), Color(0xFF3EA0F5)],
+                    colors: [AppColors.forest, AppColors.blue],
                   ).createShader(r),
                   child: const Text(
                     'familytrack',
                     style: TextStyle(
+                      fontFamily: AppTheme.displayFont,
+                      fontFamilyFallback: AppTheme.displayFallback,
                       color: Colors.white,
-                      fontSize: 36,
+                      fontSize: 40,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: -1.4,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ),
                 const SizedBox(height: 22),
                 Text(
-                  _register ? 'Create account' : 'Welcome back',
+                  _register ? 'CREATE ACCOUNT' : 'WELCOME BACK',
                   style: const TextStyle(
-                    fontSize: 30,
+                    fontFamily: AppTheme.displayFont,
+                    fontFamilyFallback: AppTheme.displayFallback,
+                    fontSize: 34,
                     fontWeight: FontWeight.w800,
-                    letterSpacing: -0.8,
-                    color: Color(0xFF0B1B3A),
+                    letterSpacing: 0.2,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -229,41 +220,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 const SizedBox(height: 8),
                 GradientActionButton(
                   label: _register ? 'Create Account' : 'Log In',
-                  colors: const [Color(0xFF2F86F2), Color(0xFF5AAEF7)],
+                  colors: const [AppColors.lime, AppColors.lime],
                   enabled: true,
                   busy: _busy,
                   onTap: _submit,
                 ),
                 const SizedBox(height: 28),
-                const Row(
-                  children: [
-                    Expanded(child: Divider(color: _fieldBorder)),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 14),
-                      child: Text(
-                        'or continue with',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    Expanded(child: Divider(color: _fieldBorder)),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                _SocialButton(
-                  label: 'Continue with Apple',
-                  logo: const Icon(Icons.apple, size: 26, color: Colors.black),
-                  onTap: () => _social('Apple'),
-                ),
-                const SizedBox(height: 14),
-                _SocialButton(
-                  label: 'Continue with Google',
-                  logo: const _GoogleG(),
-                  onTap: () => _social('Google'),
-                ),
-                const SizedBox(height: 26),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -391,91 +353,6 @@ class _Field extends StatelessWidget {
   }
 }
 
-class _SocialButton extends StatelessWidget {
-  const _SocialButton({
-    required this.label,
-    required this.logo,
-    required this.onTap,
-  });
-
-  final String label;
-  final Widget logo;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-    height: 56,
-    child: OutlinedButton(
-      onPressed: onTap,
-      style: OutlinedButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
-        side: const BorderSide(color: _fieldBorder),
-        shape: const StadiumBorder(),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(width: 26, height: 26, child: Center(child: logo)),
-          const SizedBox(width: 12),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-/// The four-color "G", drawn so no image asset is needed.
-class _GoogleG extends StatelessWidget {
-  const _GoogleG();
-
-  @override
-  Widget build(BuildContext context) =>
-      const CustomPaint(size: Size(22, 22), painter: _GooglePainter());
-}
-
-class _GooglePainter extends CustomPainter {
-  const _GooglePainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final s = size.width;
-    final stroke = s * 0.2;
-    final rect = Rect.fromLTWH(stroke / 2, stroke / 2, s - stroke, s - stroke);
-    Paint arc(Color c) => Paint()
-      ..color = c
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke;
-    const d = math.pi / 180;
-    canvas.drawArc(rect, -40 * d, -80 * d, false, arc(const Color(0xFFEA4335)));
-    canvas.drawArc(
-      rect,
-      -120 * d,
-      -100 * d,
-      false,
-      arc(const Color(0xFFFBBC05)),
-    );
-    canvas.drawArc(
-      rect,
-      140 * d,
-      -100 * d,
-      false,
-      arc(const Color(0xFF34A853)),
-    );
-    canvas.drawArc(rect, 40 * d, -40 * d, false, arc(const Color(0xFF4285F4)));
-    canvas.drawRect(
-      Rect.fromLTWH(s / 2, s / 2 - stroke / 2, s / 2, stroke),
-      Paint()..color = const Color(0xFF4285F4),
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
 /// Pale blue wash with soft blobs, behind everything.
 class _SoftBackground extends StatelessWidget {
   const _SoftBackground();
@@ -486,17 +363,17 @@ class _SoftBackground extends StatelessWidget {
       Positioned(
         top: -120,
         right: -100,
-        child: _blob(320, const Color(0xFFDCEBFC)),
+        child: _blob(320, const Color(0xFFE6E5FF)),
       ),
       Positioned(
         bottom: -140,
         left: -120,
-        child: _blob(340, const Color(0xFFE3EFFD)),
+        child: _blob(340, const Color(0xFFEEEDFF)),
       ),
       Positioned(
         bottom: -60,
         right: -80,
-        child: _blob(220, const Color(0xFFDDEBFB)),
+        child: _blob(220, const Color(0xFFE1E0FF)),
       ),
     ],
   );
@@ -532,7 +409,7 @@ class _WalletPainter extends CustomPainter {
         ..shader = const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF9CC9F8), Color(0xFF4F9BF0)],
+          colors: [Color(0xFF5653E3), AppColors.forest],
         ).createShader(body.outerRect),
     );
     // Flap with a clasp.
@@ -540,11 +417,11 @@ class _WalletPainter extends CustomPainter {
       Rect.fromLTWH(w * 0.6, h * 0.52, w * 0.34, h * 0.22),
       Radius.circular(h * 0.08),
     );
-    canvas.drawRRect(flap, Paint()..color = const Color(0xFF3B82E8));
+    canvas.drawRRect(flap, Paint()..color = AppColors.lime);
     canvas.drawCircle(
       Offset(w * 0.7, h * 0.63),
       h * 0.035,
-      Paint()..color = Colors.white,
+      Paint()..color = AppColors.forest,
     );
     // Coin peeking out of the top.
     final c = Offset(w * 0.46, h * 0.3);
@@ -555,14 +432,14 @@ class _WalletPainter extends CustomPainter {
       Paint()
         ..shader = const RadialGradient(
           center: Alignment(-0.3, -0.4),
-          colors: [Color(0xFFE6F2FF), Color(0xFF8DBDF5)],
+          colors: [Color(0xFFFFF3B0), AppColors.gold],
         ).createShader(Rect.fromCircle(center: c, radius: r)),
     );
     canvas.drawCircle(
       c,
       r,
       Paint()
-        ..color = const Color(0xFF5E9EEF)
+        ..color = const Color(0xFFE0A800)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.5,
     );
@@ -573,7 +450,7 @@ class _WalletPainter extends CustomPainter {
           fontFamily: 'PlusJakartaSans',
           fontSize: r * 1.1,
           fontWeight: FontWeight.w800,
-          color: const Color(0xFF2F78E0),
+          color: const Color(0xFF8A6500),
         ),
       ),
       textDirection: TextDirection.ltr,

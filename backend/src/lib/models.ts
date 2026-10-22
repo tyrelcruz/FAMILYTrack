@@ -41,6 +41,7 @@ export interface TransactionRow {
   note: string;
   plan_id: string | null;
   payment_method: PaymentMethod | null;
+  has_photo: number;
   created_by: string;
   created_at: number;
   updated_at: number;
@@ -146,6 +147,7 @@ export const transactionJson = (t: TransactionRow) => ({
   note: t.note,
   planId: t.plan_id,
   paymentMethod: t.payment_method,
+  hasPhoto: t.has_photo === 1,
   createdBy: t.created_by,
   updatedAt: t.updated_at,
   deleted: t.deleted_at !== null,

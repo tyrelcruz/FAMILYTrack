@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:sqflite/sqflite.dart';
 
 import 'package:finance_tracker/core/api/api_client.dart';
 import 'package:finance_tracker/core/data/app_database.dart';
+import 'package:finance_tracker/core/data/photo_store.dart';
 
 /// The group was deleted or this user is no longer in it.
 class GroupGoneException implements Exception {
@@ -51,6 +53,7 @@ class SyncService {
       query: {'since': '${rejected ? 0 : (since ?? 0)}'},
     );
     await _pull(db, res);
+    await _syncPhotoFiles(db, base);
     return SyncResult(serverTime: res['serverTime'] as int, group: group);
   }
 
@@ -206,6 +209,8 @@ class SyncService {
       );
     }
 
+    await _pushPhotos(db, base);
+
     // Plan and member deletes go after transactions so none still point
     // at them.
     for (final p in plans.where((p) => p['deleted'] == 1)) {
@@ -247,6 +252,97 @@ class SyncService {
       );
     }
     return rejected;
+  }
+
+  /// Uploads or removes receipt photos for transactions the server knows.
+  Future<void> _pushPhotos(Database db, String base) async {
+    final rows = await db.query(
+      'transactions',
+      where: 'photo_dirty = 1 AND synced = 1 AND deleted = 0',
+    );
+    for (final r in rows) {
+      final id = r['id'] as String;
+      final path = r['photo_path'] as String?;
+      try {
+        if (path != null && File(path).existsSync()) {
+          await _api.putBytes(
+            '$base/transactions/$id/photo',
+            await File(path).readAsBytes(),
+          );
+          await db.update(
+            'transactions',
+            {'photo_dirty': 0, 'has_photo': 1},
+            where: 'id = ?',
+            whereArgs: [id],
+          );
+        } else {
+          await _api.delete('$base/transactions/$id/photo');
+          await db.update(
+            'transactions',
+            {'photo_dirty': 0, 'has_photo': 0, 'photo_path': null},
+            where: 'id = ?',
+            whereArgs: [id],
+          );
+        }
+      } on ApiException catch (e) {
+        if (e.isNetwork || e.status == 401 || e.status >= 500) rethrow;
+        // Refused (too big, not an image, row gone): stop retrying.
+        await db.update(
+          'transactions',
+          {'photo_dirty': 0},
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      }
+    }
+  }
+
+  /// Downloads photos other people added, removes ones they deleted, and
+  /// deletes files no transaction points at any more.
+  Future<void> _syncPhotoFiles(Database db, String base) async {
+    final missing = await db.query(
+      'transactions',
+      where:
+          'has_photo = 1 AND photo_path IS NULL AND photo_dirty = 0 '
+          'AND deleted = 0',
+    );
+    for (final r in missing) {
+      final id = r['id'] as String;
+      try {
+        final bytes = await _api.getBytes('$base/transactions/$id/photo');
+        final path = await PhotoStore.saveBytes(id, bytes);
+        await db.update(
+          'transactions',
+          {'photo_path': path},
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      } on ApiException catch (e) {
+        if (e.isNetwork || e.status == 401 || e.status >= 500) rethrow;
+      }
+    }
+    final gone = await db.query(
+      'transactions',
+      where: 'has_photo = 0 AND photo_path IS NOT NULL AND photo_dirty = 0',
+    );
+    for (final r in gone) {
+      await PhotoStore.delete(r['photo_path'] as String?);
+      await db.update(
+        'transactions',
+        {'photo_path': null},
+        where: 'id = ?',
+        whereArgs: [r['id']],
+      );
+    }
+    final keep = {
+      for (final r in await db.query(
+        'transactions',
+        columns: ['photo_path'],
+        where: 'photo_path IS NOT NULL',
+      ))
+        r['photo_path'] as String,
+    };
+    await PhotoStore.prune(keep);
   }
 
   Future<void> _pull(Database db, Map<String, dynamic> res) async {
@@ -337,14 +433,15 @@ class SyncService {
           '''
           INSERT INTO transactions
             (id, title, amount, type, category, date, note, member_id,
-             plan_id, payment_method, dirty, synced)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1)
+             plan_id, payment_method, has_photo, dirty, synced)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1)
           ON CONFLICT (id) DO UPDATE SET
             title = excluded.title, amount = excluded.amount,
             type = excluded.type, category = excluded.category,
             date = excluded.date, note = excluded.note,
             member_id = excluded.member_id, plan_id = excluded.plan_id,
-            payment_method = excluded.payment_method, synced = 1, deleted = 0
+            payment_method = excluded.payment_method,
+            has_photo = excluded.has_photo, synced = 1, deleted = 0
           WHERE transactions.dirty = 0
           ''',
           [
@@ -358,6 +455,7 @@ class SyncService {
             t['memberId'],
             t['planId'],
             t['paymentMethod'],
+            t['hasPhoto'] == true ? 1 : 0,
           ],
         );
       }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/core/widgets/circle_button.dart';
 import 'package:finance_tracker/core/widgets/form_sheet.dart';
@@ -87,11 +88,13 @@ class FamilyScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Family',
+                        'FAMILY',
                         style: TextStyle(
-                          fontSize: 34,
+                          fontFamily: AppTheme.displayFont,
+                          fontFamilyFallback: AppTheme.displayFallback,
+                          fontSize: 38,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: -0.8,
+                          letterSpacing: 0.2,
                           color: AppColors.textPrimary,
                         ),
                       ),
@@ -214,11 +217,14 @@ class _SectionTitle extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            title,
+            title.toUpperCase(),
             style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+              fontFamily: AppTheme.displayFont,
+              fontFamilyFallback: AppTheme.displayFallback,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.4,
+              color: AppColors.textPrimary,
             ),
           ),
         ),

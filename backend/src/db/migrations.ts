@@ -158,4 +158,8 @@ export const migrations: string[] = [
   ALTER TABLE plans_new RENAME TO plans;
   CREATE INDEX plans_sync ON plans(group_id, updated_at);
   `,
+  `
+  -- A receipt or photo per transaction; the image file lives on disk.
+  ALTER TABLE transactions ADD COLUMN has_photo INTEGER NOT NULL DEFAULT 0;
+  `,
 ];

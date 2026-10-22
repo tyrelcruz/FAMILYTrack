@@ -20,17 +20,17 @@ class _HomeShellState extends State<HomeShell> {
   static const _profileTab = 3;
 
   static const _items = [
-    NavItem('Home', Icons.home_outlined, Icons.home_rounded),
-    NavItem('Plans', Icons.luggage_outlined, Icons.luggage_rounded),
-    NavItem('Family', Icons.groups_outlined, Icons.groups_rounded),
-    NavItem('Profile', Icons.settings_outlined, Icons.settings_rounded),
+    NavItem('Home', Icons.bar_chart_rounded, Icons.bar_chart_rounded),
+    NavItem('Plans', Icons.luggage_outlined, Icons.luggage),
+    NavItem('Family', Icons.people_outline_rounded, Icons.people_alt_rounded),
+    NavItem('Profile', Icons.person_outline_rounded, Icons.person_rounded),
   ];
 
   void _goToProfile() => setState(() => _index = _profileTab);
 
   @override
   Widget build(BuildContext context) {
-    // Home sits on a blue header, so its status bar icons are white.
+    // Home sits on dark green, so its status bar icons are white.
     final overlay = _index == 0
         ? SystemUiOverlayStyle.light
         : SystemUiOverlayStyle.dark;

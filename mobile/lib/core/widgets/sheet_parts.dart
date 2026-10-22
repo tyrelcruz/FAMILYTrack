@@ -1,3 +1,4 @@
+import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,7 +8,7 @@ import 'package:flutter/services.dart';
 
 /// Light grey rounded box used for every row on the sheet.
 BoxDecoration get sheetBoxDecoration => BoxDecoration(
-  color: const Color(0xFFF6F8FB),
+  color: const Color(0xFFF4F4FA),
   borderRadius: BorderRadius.circular(22),
 );
 
@@ -95,9 +96,11 @@ class SheetBigAmount extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const style = TextStyle(
-      fontSize: 40,
+      fontFamily: AppTheme.displayFont,
+      fontFamilyFallback: AppTheme.displayFallback,
+      fontSize: 45,
       fontWeight: FontWeight.w700,
-      letterSpacing: -1.5,
+      letterSpacing: 0.2,
       color: AppColors.textPrimary,
     );
     return Center(
@@ -111,12 +114,12 @@ class SheetBigAmount extends StatelessWidget {
               FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
             ],
             style: style,
-            cursorColor: AppColors.accentBlue,
+            cursorColor: AppColors.forest,
             decoration: InputDecoration(
               border: InputBorder.none,
               isDense: true,
               hintText: '0',
-              hintStyle: style.copyWith(color: const Color(0xFFCDD3DD)),
+              hintStyle: style.copyWith(color: const Color(0xFFC9C9DA)),
               // A prefix icon stays visible before anything is typed.
               prefixIcon: Padding(
                 padding: const EdgeInsets.only(right: 8),
@@ -187,7 +190,7 @@ class GradientActionButton extends StatelessWidget {
   const GradientActionButton({
     super.key,
     this.label = 'Add',
-    this.colors = const [Color(0xFF8CBDF6), Color(0xFF5E99EE)],
+    this.colors = const [AppColors.lime, AppColors.lime],
     required this.enabled,
     required this.busy,
     required this.onTap,
@@ -211,13 +214,6 @@ class GradientActionButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(26),
           gradient: LinearGradient(colors: colors),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.accentBlue.withValues(alpha: 0.3),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
         ),
         child: Material(
           type: MaterialType.transparency,
@@ -231,15 +227,15 @@ class GradientActionButton extends StatelessWidget {
                       height: 22,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        color: Colors.white,
+                        color: AppColors.forest,
                       ),
                     )
                   : Text(
                       label,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.forest,
                         fontSize: 16.5,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/api/api_client.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/features/account/models/session.dart';
@@ -27,11 +28,13 @@ class AccountScreen extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(24, 12, 24, bottomInset + 24),
         children: [
           const Text(
-            'Profile',
+            'PROFILE',
             style: TextStyle(
-              fontSize: 34,
+              fontFamily: AppTheme.displayFont,
+              fontFamilyFallback: AppTheme.displayFallback,
+              fontSize: 38,
               fontWeight: FontWeight.w700,
-              letterSpacing: -0.8,
+              letterSpacing: 0.2,
               color: AppColors.textPrimary,
             ),
           ),
@@ -330,15 +333,17 @@ class _UserCard extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFFDCE6F5), Color(0xFFB9C9E4)],
+                colors: [AppColors.lime, AppColors.lime],
               ),
             ),
             child: Text(
               session.name.isEmpty ? '?' : session.name[0].toUpperCase(),
               style: const TextStyle(
-                fontSize: 22,
+                fontFamily: AppTheme.displayFont,
+                fontFamilyFallback: AppTheme.displayFallback,
+                fontSize: 25,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF34466B),
+                color: AppColors.forest,
               ),
             ),
           ),
@@ -585,10 +590,12 @@ class _GroupCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
+                    fontFamily: AppTheme.displayFont,
+                    fontFamilyFallback: AppTheme.displayFallback,
                     color: Colors.white,
-                    fontSize: 22,
+                    fontSize: 25,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: -0.3,
+                    letterSpacing: 0.2,
                   ),
                 ),
               ),
@@ -618,10 +625,12 @@ class _GroupCard extends StatelessWidget {
                   child: Text(
                     group.inviteCode,
                     style: const TextStyle(
+                      fontFamily: AppTheme.displayFont,
+                      fontFamilyFallback: AppTheme.displayFallback,
                       color: Colors.white,
-                      fontSize: 38,
+                      fontSize: 43,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 6,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ),

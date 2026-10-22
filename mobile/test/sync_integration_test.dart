@@ -6,6 +6,7 @@
 //
 // Skipped when API_URL isn't set.
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,6 +14,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'package:finance_tracker/core/api/api_client.dart';
 import 'package:finance_tracker/core/data/app_database.dart';
+import 'package:finance_tracker/core/data/photo_store.dart';
 import 'package:finance_tracker/features/account/data/session_store.dart';
 import 'package:finance_tracker/features/account/providers/session_provider.dart';
 import 'package:finance_tracker/features/family/data/family_repository.dart';
@@ -67,6 +69,7 @@ void main() {
   Future<_Phone> freshPhone() async {
     final dir = await Directory.systemTemp.createTemp('ft_sync');
     AppDatabase.resetForTests('${dir.path}/db.sqlite');
+    PhotoStore.directoryOverride = dir;
     SharedPreferences.setMockInitialValues({});
     final phone = _Phone();
     await phone.session.setServerUrl(apiUrl!);
@@ -307,6 +310,74 @@ void main() {
     await session.sync();
     serverTxns = list(await partner.get('$base/transactions'), 'transactions');
     expect(serverTxns.any((t) => t['id'] == dinner.id), isFalse);
+
+    // Receipt photos: phone → family, family → phone, and removing.
+    final jpeg = Uint8List.fromList([
+      0xff,
+      0xd8,
+      0xff,
+      0xe0,
+      9,
+      8,
+      7,
+      6,
+      5,
+      4,
+      3,
+      2,
+    ]);
+    final shot = File(
+      '${(await Directory.systemTemp.createTemp('shot')).path}/r.jpg',
+    )..writeAsBytesSync(jpeg);
+    await finance.add(
+      TransactionItem(
+        title: 'With receipt',
+        amount: 150,
+        type: TransactionType.expense,
+        categoryId: 'groceries',
+        date: DateTime.now(),
+      ),
+      photo: shot,
+    );
+    final receipt = finance.all.firstWhere((t) => t.title == 'With receipt');
+    expect(receipt.photoPath, isNotNull);
+    await session.sync();
+    final fromPhone = await partner.getBytes(
+      '$base/transactions/${receipt.id}/photo',
+    );
+    expect(fromPhone, jpeg);
+
+    final others = finance.all.firstWhere((t) => t.title == 'Groceries');
+    final otherJpeg = Uint8List.fromList([
+      0xff,
+      0xd8,
+      0xff,
+      0xdb,
+      1,
+      1,
+      2,
+      2,
+      3,
+      3,
+      4,
+      4,
+    ]);
+    await partner.putBytes('$base/transactions/${others.id}/photo', otherJpeg);
+    await session.sync();
+    final downloaded = finance.all.firstWhere((t) => t.id == others.id);
+    expect(downloaded.hasPhoto, isTrue);
+    expect(File(downloaded.photoPath!).readAsBytesSync(), otherJpeg);
+
+    await finance.setPhoto(receipt.id!, null);
+    await session.sync();
+    await expectLater(
+      partner.getBytes('$base/transactions/${receipt.id}/photo'),
+      throwsA(isA<ApiException>()),
+    );
+    expect(
+      finance.all.firstWhere((t) => t.id == receipt.id).hasAnyPhoto,
+      isFalse,
+    );
 
     // Signing out leaves nothing behind on the phone.
     await session.logout();

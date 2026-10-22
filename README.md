@@ -24,7 +24,7 @@ Needs Node.js 22.13 or newer (uses the built-in `node:sqlite`).
 cd backend
 npm install
 cp .env.example .env   # then set JWT_SECRET
-npm run dev            # http://localhost:3000
+npm run dev            # http://localhost:3001
 npm test
 ```
 
@@ -46,10 +46,10 @@ Changes upload about a second after they're made. The family's changes download
 on launch, when the app comes back to the foreground, every minute, and on
 pull-to-refresh in the Family tab.
 
-Default server address: `http://localhost:3000/api` (iOS simulator) or
-`http://10.0.2.2:3000/api` (Android emulator). On a real phone, set your
+Default server address: `http://localhost:3001/api` (iOS simulator) or
+`http://10.0.2.2:3001/api` (Android emulator). On a real phone, set your
 computer's Wi-Fi address under **Profile → Server**, or run
-`flutter run --dart-define=API_URL=http://<your-ip>:3000/api`.
+`flutter run --dart-define=API_URL=http://<your-ip>:3001/api`.
 
 Sync test against a running API (covers every feature end to end):
 

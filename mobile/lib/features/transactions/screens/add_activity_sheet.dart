@@ -1,9 +1,12 @@
 import 'dart:math' as math;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/core/utils/formatters.dart';
 import 'package:finance_tracker/core/widgets/form_sheet.dart';
@@ -21,6 +24,7 @@ import 'package:finance_tracker/features/plans/models/plan_stats.dart';
 import 'package:finance_tracker/features/plans/providers/plan_provider.dart';
 import 'package:finance_tracker/features/transfers/providers/transfer_provider.dart';
 import 'package:finance_tracker/features/transactions/models/payment_method.dart';
+import 'package:finance_tracker/features/transactions/widgets/receipt_photo.dart';
 import 'package:finance_tracker/features/transactions/models/quick_picks.dart';
 import 'package:finance_tracker/features/transactions/models/transaction.dart';
 import 'package:finance_tracker/features/transactions/providers/finance_provider.dart';
@@ -80,6 +84,9 @@ class _AddActivitySheetState extends State<_AddActivitySheet> {
   late String _categoryId =
       widget.initialCategoryId ?? Category.forType(_type).first.id;
   String? _memberId;
+
+  /// Photo of the receipt or item, uploaded with the entry.
+  File? _photo;
   PaymentMethod _method = PaymentMethod.cash;
   bool _saving = false;
 
@@ -216,6 +223,7 @@ class _AddActivitySheetState extends State<_AddActivitySheet> {
         planId: widget.planId,
         paymentMethod: _method,
       ),
+      photo: _photo,
     );
     if (mounted) Navigator.of(context).pop();
   }
@@ -421,6 +429,12 @@ class _AddActivitySheetState extends State<_AddActivitySheet> {
                           ? 'What was it? e.g. Grab to the hotel'
                           : 'What did you buy? e.g. 2 kilos of manok'),
                 ),
+                const SizedBox(height: 10),
+                ReceiptField(
+                  compact: true,
+                  path: _photo?.path,
+                  onChanged: (f) => setState(() => _photo = f),
+                ),
                 const SizedBox(height: 12),
                 _CategoryStrip(
                   categories: _categories,
@@ -510,7 +524,7 @@ class _CategoryCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(22),
         child: Ink(
-          height: 84,
+          height: 90,
           decoration: sheetBoxDecoration,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(22),
@@ -568,9 +582,12 @@ class _CategoryCard extends StatelessWidget {
                                 Text(
                                   amount,
                                   style: const TextStyle(
-                                    fontSize: 22,
+                                    fontFamily: AppTheme.displayFont,
+                                    fontFamilyFallback:
+                                        AppTheme.displayFallback,
+                                    fontSize: 25,
                                     fontWeight: FontWeight.w700,
-                                    letterSpacing: -0.6,
+                                    letterSpacing: 0.2,
                                     color: AppColors.textPrimary,
                                   ),
                                 ),
@@ -653,22 +670,13 @@ class _CheckCard extends StatelessWidget {
                       child: Container(
                         width: 38,
                         height: 38,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
+                        decoration: const BoxDecoration(
+                          color: AppColors.lime,
                           shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.accentBlue.withValues(
-                                alpha: 0.25,
-                              ),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
                         ),
                         child: const Icon(
                           Icons.arrow_forward_rounded,
-                          color: AppColors.accentBlue,
+                          color: AppColors.forest,
                           size: 24,
                         ),
                       ),
@@ -746,7 +754,7 @@ class _SparklePainter extends CustomPainter {
           ..shader = const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF9FD8F7), Color(0xFF3F86F0), Color(0xFF7FE0C9)],
+            colors: [Color(0xFFFFEE99), AppColors.gold, Color(0xFFF08C00)],
             stops: [0, 0.6, 1],
           ).createShader(rect),
       );

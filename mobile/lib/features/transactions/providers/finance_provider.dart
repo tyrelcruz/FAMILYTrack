@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 
 import 'package:finance_tracker/features/transactions/data/transaction_repository.dart';
@@ -69,14 +71,21 @@ class FinanceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> add(TransactionItem t) async {
-    await _repo.insert(t);
+  Future<void> add(TransactionItem t, {File? photo}) async {
+    await _repo.insert(t, photo: photo);
     await load();
     onLocalChange?.call();
   }
 
   Future<void> edit(TransactionItem t) async {
     await _repo.update(t);
+    await load();
+    onLocalChange?.call();
+  }
+
+  /// Sets, replaces or (with null) removes a transaction's photo.
+  Future<void> setPhoto(String id, File? photo) async {
+    await _repo.setPhoto(id, photo);
     await load();
     onLocalChange?.call();
   }

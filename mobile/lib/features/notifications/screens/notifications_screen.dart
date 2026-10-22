@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/core/utils/formatters.dart';
 import 'package:finance_tracker/core/widgets/circle_button.dart';
@@ -88,9 +89,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         'Notifications',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 22,
+                          fontFamily: AppTheme.displayFont,
+                          fontFamilyFallback: AppTheme.displayFallback,
+                          fontSize: 25,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: -0.4,
+                          letterSpacing: 0.2,
                           color: AppColors.textPrimary,
                         ),
                       ),
@@ -442,11 +445,14 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.fromLTRB(2, 24, 2, 10),
     child: Text(
-      title,
+      title.toUpperCase(),
       style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textSecondary,
+        fontFamily: AppTheme.displayFont,
+        fontFamilyFallback: AppTheme.displayFallback,
+        fontSize: 22,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 0.4,
+        color: AppColors.textPrimary,
       ),
     ),
   );

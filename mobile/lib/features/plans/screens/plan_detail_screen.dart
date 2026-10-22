@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/core/utils/formatters.dart';
 import 'package:finance_tracker/core/widgets/empty_state.dart';
@@ -33,11 +34,11 @@ import 'package:finance_tracker/features/transfers/widgets/transfer_row.dart';
 
 enum _Tab { transactions, members, details }
 
-const _navy = Color(0xFF14325C);
-const _sheetTop = Color(0xFFE4F0FC);
-const _sheetBottom = Color(0xFFF2F7FD);
-const _paleBlue = Color(0xFFDCEBFB);
-const _iconBlue = Color(0xFF1D5BA8);
+const _navy = AppColors.textPrimary;
+const _sheetTop = Color(0xFFE9E8FF);
+const _sheetBottom = AppColors.background;
+const _paleBlue = Color(0xFFE3E2FF);
+const _iconBlue = AppColors.forest;
 
 /// Trip or monthly plan overview: scene header, budget, quick actions, then
 /// transactions, members and details in tabs.
@@ -354,7 +355,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           const EmptyState('No expenses yet — tap Add Expense'),
         for (var i = 0; i < shown.length; i++) ...[
           if (i > 0)
-            const Divider(height: 1, indent: 70, color: Color(0xFFDCE6F2)),
+            const Divider(height: 1, indent: 70, color: Color(0xFFDCDCEA)),
           switch (shown[i].$2) {
             final TransactionItem e => _ExpenseLine(
               item: e,
@@ -624,10 +625,12 @@ class _SceneHeader extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
+                        fontFamily: AppTheme.displayFont,
+                        fontFamilyFallback: AppTheme.displayFallback,
                         color: Colors.white,
-                        fontSize: 30,
+                        fontSize: 34,
                         fontWeight: FontWeight.w800,
-                        letterSpacing: -0.6,
+                        letterSpacing: 0.2,
                         shadows: _shadow,
                       ),
                     ),
@@ -770,9 +773,11 @@ class _BudgetCard extends StatelessWidget {
               Text(
                 formatAmount(spent),
                 style: TextStyle(
-                  fontSize: 30,
+                  fontFamily: AppTheme.displayFont,
+                  fontFamilyFallback: AppTheme.displayFallback,
+                  fontSize: 34,
                   fontWeight: FontWeight.w800,
-                  letterSpacing: -0.8,
+                  letterSpacing: 0.2,
                   color: over ? AppColors.expenseRed : _navy,
                 ),
               ),
@@ -793,7 +798,7 @@ class _BudgetCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(5),
                   child: Container(
                     height: 10,
-                    color: const Color(0xFFE6EEF8),
+                    color: const Color(0xFFE6E6F2),
                     alignment: Alignment.centerLeft,
                     child: FractionallySizedBox(
                       widthFactor: math.min(ratio, 1),
@@ -807,7 +812,7 @@ class _BudgetCard extends StatelessWidget {
                                     Color(0xFFF87171),
                                     AppColors.expenseRed,
                                   ]
-                                : const [Color(0xFF1E6FE8), Color(0xFF4FA6F7)],
+                                : const [AppColors.lime, AppColors.lime],
                           ),
                         ),
                       ),
@@ -894,11 +899,7 @@ class _Tabs extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(22),
-              gradient: selected
-                  ? const LinearGradient(
-                      colors: [Color(0xFF2F8CF5), Color(0xFF5DB2F8)],
-                    )
-                  : null,
+              color: selected ? AppColors.lime : null,
             ),
             alignment: Alignment.center,
             child: Text(
@@ -906,7 +907,7 @@ class _Tabs extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14.5,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                color: selected ? Colors.white : _navy,
+                color: selected ? AppColors.forest : _navy,
               ),
             ),
           ),
@@ -917,7 +918,7 @@ class _Tabs extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFFE1EDFA),
+        color: const Color(0xFFE3E2F6),
         borderRadius: BorderRadius.circular(26),
         border: Border.all(color: Colors.white.withValues(alpha: 0.7)),
       ),
@@ -968,15 +969,29 @@ class _ExpenseLine extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    item.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15.5,
-                      fontWeight: FontWeight.w600,
-                      color: _navy,
-                    ),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          item.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 15.5,
+                            fontWeight: FontWeight.w600,
+                            color: _navy,
+                          ),
+                        ),
+                      ),
+                      if (item.hasAnyPhoto) ...[
+                        const SizedBox(width: 6),
+                        const Icon(
+                          Icons.photo_camera_outlined,
+                          size: 15,
+                          color: AppColors.textMuted,
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 5),
                   Text(
@@ -1024,11 +1039,14 @@ class _SectionTitle extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            title,
+            title.toUpperCase(),
             style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: _navy,
+              fontFamily: AppTheme.displayFont,
+              fontFamilyFallback: AppTheme.displayFallback,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.4,
+              color: AppColors.textPrimary,
             ),
           ),
         ),

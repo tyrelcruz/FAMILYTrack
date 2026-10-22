@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/core/utils/formatters.dart';
 import 'package:finance_tracker/features/family/models/family_member.dart';
@@ -90,10 +91,12 @@ class FamilyHeroCard extends StatelessWidget {
             child: Text(
               formatAmount(spent),
               style: const TextStyle(
+                fontFamily: AppTheme.displayFont,
+                fontFamilyFallback: AppTheme.displayFallback,
                 color: Colors.white,
-                fontSize: 40,
+                fontSize: 45,
                 fontWeight: FontWeight.w700,
-                letterSpacing: -1,
+                letterSpacing: 0.2,
                 height: 1.15,
               ),
             ),

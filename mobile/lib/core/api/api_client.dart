@@ -12,8 +12,8 @@ String defaultApiUrl() {
   const fromEnv = String.fromEnvironment('API_URL');
   if (fromEnv.isNotEmpty) return fromEnv;
   // The Android emulator reaches the host machine at 10.0.2.2.
-  if (!kIsWeb && Platform.isAndroid) return 'http://10.0.2.2:3000/api';
-  return 'http://localhost:3000/api';
+  if (!kIsWeb && Platform.isAndroid) return 'http://10.0.2.2:3001/api';
+  return 'http://localhost:3001/api';
 }
 
 class ApiException implements Exception {
@@ -49,6 +49,53 @@ class ApiClient {
   Future<Map<String, dynamic>> put(String path, Object body) =>
       _send('PUT', path, body: body);
   Future<Map<String, dynamic>> delete(String path) => _send('DELETE', path);
+
+  /// Uploads raw bytes (e.g. a JPEG) as the request body.
+  Future<void> putBytes(
+    String path,
+    Uint8List bytes, {
+    String type = 'image/jpeg',
+  }) async {
+    await _raw('PUT', path, bytes: bytes, type: type);
+  }
+
+  /// Downloads a binary response such as an image.
+  Future<Uint8List> getBytes(String path) async =>
+      (await _raw('GET', path)).bodyBytes;
+
+  Future<http.Response> _raw(
+    String method,
+    String path, {
+    Uint8List? bytes,
+    String? type,
+  }) async {
+    final request = http.Request(method, Uri.parse('$baseUrl$path'));
+    if (token != null) request.headers['authorization'] = 'Bearer $token';
+    if (type != null) request.headers['content-type'] = type;
+    if (bytes != null) request.bodyBytes = bytes;
+    final http.Response res;
+    try {
+      res = await http.Response.fromStream(
+        await _http.send(request).timeout(const Duration(seconds: 60)),
+      );
+    } on TimeoutException {
+      throw const ApiException(0, 'The server took too long to answer');
+    } on SocketException {
+      throw const ApiException(0, 'Can’t reach the server');
+    } on http.ClientException {
+      throw const ApiException(0, 'Can’t reach the server');
+    }
+    if (res.statusCode >= 400) {
+      final decoded = res.body.isEmpty ? null : _tryDecode(res.body);
+      throw ApiException(
+        res.statusCode,
+        decoded is Map && decoded['error'] is String
+            ? decoded['error'] as String
+            : 'Request failed (${res.statusCode})',
+      );
+    }
+    return res;
+  }
 
   Future<Map<String, dynamic>> _send(
     String method,

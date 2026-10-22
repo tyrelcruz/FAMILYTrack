@@ -274,7 +274,7 @@ class _TransferSheetState extends State<_TransferSheet> {
                           onPressed: _swap,
                           icon: const Icon(
                             Icons.arrow_forward_rounded,
-                            color: AppColors.accentBlue,
+                            color: AppColors.forest,
                           ),
                         ),
                       ),

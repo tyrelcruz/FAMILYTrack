@@ -9,7 +9,8 @@ class NavItem {
   final IconData selectedIcon;
 }
 
-/// White bottom bar: two tabs, a blue "add" button, two tabs.
+/// Plain white tab bar with outline icons and labels: two tabs, "Add",
+/// two tabs. The selected tab is dark; the rest are light grey.
 class FloatingNavBar extends StatelessWidget {
   const FloatingNavBar({
     super.key,
@@ -24,47 +25,44 @@ class FloatingNavBar extends StatelessWidget {
   final ValueChanged<int> onTap;
   final VoidCallback onAdd;
 
+  static const _idle = Color(0xFFB3B3C4);
+
   @override
   Widget build(BuildContext context) {
     Widget tab(int i) => Expanded(
-      child: _NavButton(
-        item: items[i],
+      child: _Tab(
+        label: items[i].label,
+        icon: i == currentIndex ? items[i].selectedIcon : items[i].icon,
         selected: i == currentIndex,
         onTap: () => onTap(i),
       ),
     );
 
-    // Fade the page into the bar so scrolled content doesn't end abruptly.
     return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppColors.background.withValues(alpha: 0),
-            AppColors.surface,
-          ],
-          stops: const [0, 0.3],
-        ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: AppColors.divider)),
       ),
       child: SafeArea(
         top: false,
-        minimum: const EdgeInsets.only(bottom: 8),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 28, 16, 0),
-          child: SizedBox(
-            height: 66,
-            child: Row(
-              children: [
-                tab(0),
-                tab(1),
-                Expanded(
-                  child: Center(child: _AddButton(onTap: onAdd)),
+        child: SizedBox(
+          height: 66,
+          child: Row(
+            children: [
+              tab(0),
+              tab(1),
+              Expanded(
+                child: _Tab(
+                  label: 'Add',
+                  icon: Icons.add_box_outlined,
+                  selected: false,
+                  accent: true,
+                  onTap: onAdd,
                 ),
-                tab(2),
-                tab(3),
-              ],
-            ),
+              ),
+              tab(2),
+              tab(3),
+            ],
           ),
         ),
       ),
@@ -72,69 +70,51 @@ class FloatingNavBar extends StatelessWidget {
   }
 }
 
-class _NavButton extends StatelessWidget {
-  const _NavButton({
-    required this.item,
+class _Tab extends StatelessWidget {
+  const _Tab({
+    required this.label,
+    required this.icon,
     required this.selected,
     required this.onTap,
+    this.accent = false,
   });
 
-  final NavItem item;
+  final String label;
+  final IconData icon;
   final bool selected;
   final VoidCallback onTap;
 
+  /// The Add button: indigo so it stands out without breaking the row.
+  final bool accent;
+
   @override
   Widget build(BuildContext context) {
+    final color = accent
+        ? AppColors.forest
+        : (selected ? AppColors.textPrimary : FloatingNavBar._idle);
     return Semantics(
-      label: item.label,
+      label: label,
       selected: selected,
       button: true,
       child: InkResponse(
         onTap: onTap,
-        radius: 32,
-        child: Center(
-          child: Icon(
-            selected ? item.selectedIcon : item.icon,
-            color: selected ? AppColors.textPrimary : AppColors.textMuted,
-            size: 28,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AddButton extends StatelessWidget {
-  const _AddButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 74,
-      height: 60,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF5C9DF2), Color(0xFF8FCBF5)],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.accentBlue.withValues(alpha: 0.35),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(18),
-          child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
+        radius: 36,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color, size: 29),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: selected || accent
+                    ? FontWeight.w600
+                    : FontWeight.w500,
+                color: color,
+              ),
+            ),
+          ],
         ),
       ),
     );

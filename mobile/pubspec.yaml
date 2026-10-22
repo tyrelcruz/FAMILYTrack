@@ -44,6 +44,7 @@ dependencies:
   shared_preferences: ^2.5.6
   flutter_contacts: ^2.6.0
   share_plus: ^13.3.1
+  image_picker: ^1.2.4
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +69,12 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  assets:
+    # Coin faces in Home's breakdown chart (₱1 income, ₱5 spending, ₱20 plans).
+    - assets/images/peso_coin.png
+    - assets/images/peso_coin_1.png
+    - assets/images/peso_coin_5.png
+
   fonts:
     - family: PlusJakartaSans
       fonts:
@@ -79,6 +86,19 @@ flutter:
         - asset: assets/fonts/PlusJakartaSans-Bold.ttf
           weight: 700
         - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
+          weight: 800
+    # Display face for big numbers and headings (Plau; commercial license
+    # needed to publish the app).
+    - family: VinilaCompressed
+      fonts:
+        - asset: assets/fonts/VinilaCompressed-Bold.otf
+          weight: 700
+    # Free fallback display face (OFL), if Vinila can't be used.
+    - family: BarlowCondensed
+      fonts:
+        - asset: assets/fonts/BarlowCondensed-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/BarlowCondensed-ExtraBold.ttf
           weight: 800
 
   # To add assets to your application, add an assets section, like this:

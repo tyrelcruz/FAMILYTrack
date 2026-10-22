@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/core/widgets/form_sheet.dart';
 import 'package:finance_tracker/features/account/providers/session_provider.dart';
@@ -82,7 +83,7 @@ class _PlansScreenState extends State<PlansScreen> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFFD6E8FB), AppColors.background],
+              colors: [Color(0xFFE2E1FF), AppColors.background],
             ),
           ),
         ),
@@ -100,11 +101,13 @@ class _PlansScreenState extends State<PlansScreen> {
                 children: [
                   const Expanded(
                     child: Text(
-                      'Plans',
+                      'PLANS',
                       style: TextStyle(
-                        fontSize: 30,
+                        fontFamily: AppTheme.displayFont,
+                        fontFamilyFallback: AppTheme.displayFallback,
+                        fontSize: 34,
                         fontWeight: FontWeight.w700,
-                        letterSpacing: -0.8,
+                        letterSpacing: 0.2,
                         color: AppColors.textPrimary,
                       ),
                     ),
@@ -198,20 +201,7 @@ class _PlanTabs extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 13),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(22),
-              gradient: selected
-                  ? const LinearGradient(
-                      colors: [Color(0xFF2F7CF6), Color(0xFF4F98F8)],
-                    )
-                  : null,
-              boxShadow: selected
-                  ? [
-                      BoxShadow(
-                        color: AppColors.blue.withValues(alpha: 0.3),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : null,
+              color: selected ? AppColors.lime : null,
             ),
             alignment: Alignment.center,
             child: Text(
@@ -219,7 +209,7 @@ class _PlanTabs extends StatelessWidget {
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: selected ? Colors.white : AppColors.textPrimary,
+                color: selected ? AppColors.forest : AppColors.textPrimary,
               ),
             ),
           ),
@@ -341,10 +331,13 @@ class _SectionTitle extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            title,
+            title.toUpperCase(),
             style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontFamily: AppTheme.displayFont,
+              fontFamilyFallback: AppTheme.displayFallback,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.4,
               color: AppColors.textPrimary,
             ),
           ),

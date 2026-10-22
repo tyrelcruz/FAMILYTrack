@@ -1,3 +1,7 @@
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import cors from 'cors';
 import express from 'express';
 
@@ -13,7 +17,11 @@ import { syncRoutes } from './routes/sync.js';
 import { transactionRoutes } from './routes/transactions.js';
 import { transferRoutes } from './routes/transfers.js';
 
-export function createApp(db: Db) {
+export function createApp(
+  db: Db,
+  // Where receipt photos are kept; a throwaway folder unless given.
+  photosDir: string = mkdtempSync(join(tmpdir(), 'familytrack-photos-')),
+) {
   const app = express();
   app.disable('x-powered-by');
   app.use(cors());
@@ -30,7 +38,7 @@ export function createApp(db: Db) {
 
   const inGroup = requireGroupMember(db);
   api.use('/groups/:groupId/members', inGroup, memberRoutes(db));
-  api.use('/groups/:groupId/transactions', inGroup, transactionRoutes(db));
+  api.use('/groups/:groupId/transactions', inGroup, transactionRoutes(db, photosDir));
   api.use('/groups/:groupId/budgets', inGroup, budgetRoutes(db));
   api.use('/groups/:groupId/plans', inGroup, planRoutes(db));
   api.use('/groups/:groupId/transfers', inGroup, transferRoutes(db));

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/core/utils/formatters.dart';
 import 'package:finance_tracker/features/family/models/family_member.dart';
@@ -113,10 +114,12 @@ class FeaturedPlanCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
+                                fontFamily: AppTheme.displayFont,
+                                fontFamilyFallback: AppTheme.displayFallback,
                                 color: Colors.white,
-                                fontSize: 24,
+                                fontSize: 27,
                                 fontWeight: FontWeight.w700,
-                                letterSpacing: -0.4,
+                                letterSpacing: 0.2,
                                 shadows: [
                                   Shadow(
                                     color: Color(0x55000000),
@@ -173,9 +176,11 @@ class FeaturedPlanCard extends StatelessWidget {
                           Text(
                             formatAmount(spent),
                             style: TextStyle(
-                              fontSize: 26,
+                              fontFamily: AppTheme.displayFont,
+                              fontFamilyFallback: AppTheme.displayFallback,
+                              fontSize: 29,
                               fontWeight: FontWeight.w700,
-                              letterSpacing: -0.6,
+                              letterSpacing: 0.2,
                               color: over
                                   ? AppColors.expenseRed
                                   : AppColors.textPrimary,
@@ -366,7 +371,7 @@ class _Bar extends StatelessWidget {
             gradient: LinearGradient(
               colors: over
                   ? const [Color(0xFFF87171), AppColors.expenseRed]
-                  : const [Color(0xFF3B82F6), Color(0xFF60A5FA)],
+                  : const [AppColors.lime, AppColors.lime],
             ),
           ),
         ),

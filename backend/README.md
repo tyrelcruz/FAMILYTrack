@@ -10,7 +10,7 @@ Keeps a family group's members, spending and budgets in sync across phones.
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Start with reload on http://localhost:3000 |
+| `npm run dev` | Start with reload on http://localhost:3001 |
 | `npm test` | End-to-end API tests on an in-memory database |
 | `npm run build` / `npm start` | Compile to `dist/` and run it |
 | `npm run typecheck` | Type-check only |
@@ -65,6 +65,7 @@ Group routes return 404 to anyone outside the group.
 | GET | `/groups/:groupId/transactions?month=2026-10` | `month` optional (UTC bounds) |
 | POST | `/groups/:groupId/transactions` | `{title, amount, type, categoryId, date, note?, memberId?, planId?, paymentMethod?, id?}` |
 | PATCH / DELETE | `/groups/:groupId/transactions/:id` | Partial update / soft delete |
+| PUT / GET / DELETE | `/groups/:groupId/transactions/:id/photo` | Receipt photo: PUT the image bytes (JPEG/PNG/WebP/HEIC, up to 6 MB); `hasPhoto` shows in sync. Files live in `photos/` next to the database. |
 | GET | `/groups/:groupId/budgets` | |
 | PUT / DELETE | `/groups/:groupId/budgets/:categoryId` | `{limit}`; `categoryId` may be `overall` |
 | GET / POST | `/groups/:groupId/plans` | `{name, kind, startDate, endDate, funds, shares, split, id?}` |

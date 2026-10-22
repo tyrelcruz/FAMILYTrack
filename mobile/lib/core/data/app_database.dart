@@ -3,6 +3,7 @@ import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 
 import 'package:finance_tracker/core/constants/user_profile.dart';
+import 'package:finance_tracker/core/data/photo_store.dart';
 import 'package:finance_tracker/core/utils/ids.dart';
 import 'package:finance_tracker/features/family/models/family_member.dart';
 
@@ -33,7 +34,7 @@ class AppDatabase {
         pathOverride ?? p.join(await getDatabasesPath(), 'finance_tracker.db');
     return openDatabase(
       path,
-      version: 7,
+      version: 8,
       onCreate: (db, _) async {
         await _createTables(db);
         await seedOwner(db);
@@ -55,6 +56,19 @@ class AppDatabase {
         // Plans made by v4's table need the creator column; newer ones have it.
         if (from >= 4 && from < 6) {
           await db.execute('ALTER TABLE plans ADD COLUMN created_by TEXT');
+        }
+        if (from < 8) {
+          // photo_path: the image on this phone; has_photo: the server has
+          // one; photo_dirty: a change here still has to be uploaded.
+          await db.execute(
+            'ALTER TABLE transactions ADD COLUMN photo_path TEXT',
+          );
+          await db.execute(
+            'ALTER TABLE transactions ADD COLUMN has_photo INTEGER NOT NULL DEFAULT 0',
+          );
+          await db.execute(
+            'ALTER TABLE transactions ADD COLUMN photo_dirty INTEGER NOT NULL DEFAULT 0',
+          );
         }
         if (from >= 4 && from < 7) {
           await db.execute(
@@ -81,6 +95,9 @@ class AppDatabase {
         member_id TEXT,
         plan_id TEXT,
         payment_method TEXT,
+        photo_path TEXT,
+        has_photo INTEGER NOT NULL DEFAULT 0,
+        photo_dirty INTEGER NOT NULL DEFAULT 0,
         dirty INTEGER NOT NULL DEFAULT 1,
         synced INTEGER NOT NULL DEFAULT 0,
         deleted INTEGER NOT NULL DEFAULT 0
@@ -177,6 +194,7 @@ class AppDatabase {
   /// Wipes everything, e.g. before downloading a family's data.
   static Future<void> clear({bool keepOwner = false}) async {
     final db = await instance;
+    await PhotoStore.deleteAll();
     await db.transaction((txn) async {
       await txn.delete('transactions');
       await txn.delete('members');

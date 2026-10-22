@@ -31,8 +31,12 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Take a photo of a receipt or purchase to keep with a transaction.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Pick friends and family from your contacts to add them to a plan.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Choose a photo of a receipt or purchase to keep with a transaction.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

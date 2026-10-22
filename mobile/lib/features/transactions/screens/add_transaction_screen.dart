@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/core/utils/formatters.dart';
 import 'package:finance_tracker/core/widgets/circle_button.dart';
@@ -14,6 +17,7 @@ import 'package:finance_tracker/features/family/widgets/member_chip.dart';
 import 'package:finance_tracker/features/plans/models/plan.dart';
 import 'package:finance_tracker/features/plans/providers/plan_provider.dart';
 import 'package:finance_tracker/features/transactions/models/payment_method.dart';
+import 'package:finance_tracker/features/transactions/widgets/receipt_photo.dart';
 import 'package:finance_tracker/features/transactions/models/transaction.dart';
 import 'package:finance_tracker/features/transactions/providers/finance_provider.dart';
 
@@ -43,6 +47,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   late DateTime _date;
   String? _memberId;
   PaymentMethod? _method;
+
+  /// A photo picked on this screen; [_photoChanged] also covers removing.
+  File? _newPhoto;
+  bool _photoChanged = false;
 
   bool get _editing => widget.existing != null;
 
@@ -160,7 +168,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       planId: widget.existing?.planId,
       paymentMethod: _method,
     );
-    _editing ? await provider.edit(item) : await provider.add(item);
+    if (_editing) {
+      await provider.edit(item);
+      if (_photoChanged) await provider.setPhoto(item.id!, _newPhoto);
+    } else {
+      await provider.add(item, photo: _newPhoto);
+    }
     if (mounted) Navigator.of(context).pop();
   }
 
@@ -210,9 +223,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         _editing ? 'Edit Transaction' : 'New Transaction',
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                          fontSize: 22,
+                          fontFamily: AppTheme.displayFont,
+                          fontFamilyFallback: AppTheme.displayFallback,
+                          fontSize: 25,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: -0.4,
+                          letterSpacing: 0.2,
                           color: AppColors.textPrimary,
                         ),
                       ),
@@ -269,9 +284,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                 ),
                               ],
                               style: TextStyle(
-                                fontSize: 44,
+                                fontFamily: AppTheme.displayFont,
+                                fontFamilyFallback: AppTheme.displayFallback,
+                                fontSize: 49,
                                 fontWeight: FontWeight.w700,
-                                letterSpacing: -1.2,
+                                letterSpacing: 0.2,
                                 color: expense
                                     ? AppColors.textPrimary
                                     : AppColors.green,
@@ -284,7 +301,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                 ),
                                 prefixText: '₱',
                                 prefixStyle: TextStyle(
-                                  fontSize: 44,
+                                  fontFamily: AppTheme.displayFont,
+                                  fontFamilyFallback: AppTheme.displayFallback,
+                                  fontSize: 49,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.textMuted,
                                 ),
@@ -412,6 +431,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                             ),
                           ),
                         ),
+                      ),
+                      const SizedBox(height: 20),
+                      const SheetLabel('Photo'),
+                      ReceiptField(
+                        path: _photoChanged
+                            ? _newPhoto?.path
+                            : widget.existing?.photoPath,
+                        onChanged: (f) => setState(() {
+                          _newPhoto = f;
+                          _photoChanged = true;
+                        }),
                       ),
                       const SizedBox(height: 20),
                       const SheetLabel('Note'),

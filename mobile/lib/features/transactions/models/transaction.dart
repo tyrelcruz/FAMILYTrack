@@ -14,6 +14,8 @@ class TransactionItem {
     this.memberId,
     this.planId,
     this.paymentMethod,
+    this.photoPath,
+    this.hasPhoto = false,
   });
 
   /// UUID; null until saved.
@@ -33,6 +35,14 @@ class TransactionItem {
 
   /// Cash, e-wallet, card or bank; null when not recorded.
   final PaymentMethod? paymentMethod;
+
+  /// Receipt or purchase photo kept on this phone, if downloaded or taken.
+  final String? photoPath;
+
+  /// The server has a photo; it may not be downloaded here yet.
+  final bool hasPhoto;
+
+  bool get hasAnyPhoto => photoPath != null || hasPhoto;
 
   bool get isExpense => type == TransactionType.expense;
 
@@ -60,6 +70,8 @@ class TransactionItem {
     memberId: m['member_id'] as String?,
     planId: m['plan_id'] as String?,
     paymentMethod: PaymentMethod.tryParse(m['payment_method']),
+    photoPath: m['photo_path'] as String?,
+    hasPhoto: (m['has_photo'] as int? ?? 0) == 1,
   );
 
   /// Shape the sync API sends and accepts.

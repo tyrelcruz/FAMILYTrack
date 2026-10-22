@@ -62,7 +62,7 @@ class _Shell extends StatelessWidget {
     return Container(
       width: 168,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.background,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -140,34 +140,31 @@ class _BudgetCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    format(progress.spent),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: format(progress.spent),
                     style: const TextStyle(
                       fontSize: 19,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800,
                       letterSpacing: -0.4,
                       color: AppColors.textPrimary,
                     ),
                   ),
-                ),
+                  TextSpan(
+                    text: '  / ${format(b.limit)}',
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
               ),
-              const Spacer(),
-              Text(
-                '/ ${format(b.limit)}',
-                style: const TextStyle(
-                  fontSize: 13.5,
-                  color: AppColors.textMuted,
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),

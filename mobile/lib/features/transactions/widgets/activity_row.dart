@@ -91,15 +91,30 @@ class ActivityRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    item.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          item.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      // A photo is attached.
+                      if (item.hasAnyPhoto) ...[
+                        const SizedBox(width: 6),
+                        const Icon(
+                          Icons.photo_camera_outlined,
+                          size: 16,
+                          color: AppColors.textMuted,
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 5),
                   Row(

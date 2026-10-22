@@ -313,6 +313,50 @@ describe('family sync API', () => {
     }
   });
 
+  it('stores a receipt photo per transaction', async () => {
+    const t = await call('POST', `/groups/${groupId}/transactions`, owner, {
+      title: 'Grocery receipt',
+      amount: 300,
+      type: 'expense',
+      categoryId: 'groceries',
+      date: Date.now(),
+    });
+    const id = t.body.transaction.id;
+    const url = `${base}/groups/${groupId}/transactions/${id}/photo`;
+    const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    const put = (body: Buffer, token = owner) =>
+      fetch(url, {
+        method: 'PUT',
+        headers: { authorization: `Bearer ${token}`, 'content-type': 'image/jpeg' },
+        body: new Uint8Array(body),
+      });
+
+    assert.equal((await put(Buffer.from('not an image at all'))).status, 400);
+    assert.equal((await put(jpeg)).status, 204);
+
+    const sync = await call('GET', `/groups/${groupId}/sync`, partner);
+    const synced = sync.body.transactions.find((x: { id: string }) => x.id === id);
+    assert.equal(synced.hasPhoto, true);
+
+    const got = await fetch(url, { headers: { authorization: `Bearer ${partner}` } });
+    assert.equal(got.status, 200);
+    assert.deepEqual(Buffer.from(await got.arrayBuffer()), jpeg);
+
+    const outsider = await register('Outsider');
+    assert.equal(
+      (await fetch(url, { headers: { authorization: `Bearer ${outsider}` } })).status,
+      404,
+    );
+
+    const del = await fetch(url, {
+      method: 'DELETE',
+      headers: { authorization: `Bearer ${owner}` },
+    });
+    assert.equal(del.status, 204);
+    const after = await fetch(url, { headers: { authorization: `Bearer ${owner}` } });
+    assert.equal(after.status, 404);
+  });
+
   it('lets members leave and owners delete the group', async () => {
     assert.equal((await call('POST', `/groups/${groupId}/leave`, owner)).status, 409);
     assert.equal((await call('POST', `/groups/${groupId}/leave`, partner)).status, 204);

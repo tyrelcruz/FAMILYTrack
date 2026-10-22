@@ -135,7 +135,17 @@ void main() {
     final old = await openDatabase(
       path,
       version: 5,
-      onCreate: (db, _) => db.execute('''
+      onCreate: (db, _) async {
+        await db.execute('''
+          CREATE TABLE transactions (
+            id TEXT PRIMARY KEY, title TEXT NOT NULL, amount REAL NOT NULL,
+            type TEXT NOT NULL, category TEXT NOT NULL, date INTEGER NOT NULL,
+            note TEXT NOT NULL DEFAULT '', member_id TEXT, plan_id TEXT,
+            payment_method TEXT, dirty INTEGER NOT NULL DEFAULT 1,
+            synced INTEGER NOT NULL DEFAULT 0,
+            deleted INTEGER NOT NULL DEFAULT 0)
+        ''');
+        await db.execute('''
         CREATE TABLE plans (
           id TEXT PRIMARY KEY, name TEXT NOT NULL, kind TEXT NOT NULL,
           start_date INTEGER NOT NULL, end_date INTEGER NOT NULL,
@@ -143,7 +153,8 @@ void main() {
           dirty INTEGER NOT NULL DEFAULT 1,
           synced INTEGER NOT NULL DEFAULT 0,
           deleted INTEGER NOT NULL DEFAULT 0)
-      '''),
+      ''');
+      },
     );
     await old.insert('plans', {
       'id': 'p1',
@@ -165,6 +176,11 @@ void main() {
     // v7: where it is and what it's about.
     expect(plan['destination'], '');
     expect(plan['description'], '');
+    // v8: receipt photos on transactions.
+    final cols = (await db.rawQuery(
+      'PRAGMA table_info(transactions)',
+    )).map((c) => c['name']).toSet();
+    expect(cols, containsAll(['photo_path', 'has_photo', 'photo_dirty']));
     await db.close();
     await dir.delete(recursive: true);
   });

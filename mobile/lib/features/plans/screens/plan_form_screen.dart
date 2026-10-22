@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/core/utils/formatters.dart';
 import 'package:finance_tracker/core/widgets/form_sheet.dart';
@@ -20,9 +21,9 @@ import 'package:finance_tracker/features/plans/providers/plan_provider.dart';
 import 'package:finance_tracker/features/plans/widgets/plan_scene.dart';
 import 'package:finance_tracker/features/transactions/models/payment_method.dart';
 
-const _navy = Color(0xFF14325C);
-const _blue = Color(0xFF1F7AEC);
-const _border = Color(0xFFD6E6FA);
+const _navy = AppColors.textPrimary;
+const _blue = AppColors.blue;
+const _border = Color(0xFFE2E2EE);
 
 /// The three tabs; Custom covers a whole month or any other dates.
 enum _Mode { trip, event, custom }
@@ -283,14 +284,14 @@ class _PlanFormScreenState extends State<PlanFormScreen> {
         statusBarColor: Colors.transparent,
       ),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF2F7FD),
+        backgroundColor: AppColors.background,
         bottomNavigationBar: SafeArea(
           minimum: const EdgeInsets.only(bottom: 8),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
             child: GradientActionButton(
               label: _editing ? 'Save Changes' : 'Create Plan',
-              colors: const [Color(0xFF2F86F2), Color(0xFF5AAEF7)],
+              colors: const [AppColors.lime, AppColors.lime],
               enabled: true,
               busy: _saving,
               onTap: _save,
@@ -356,9 +357,11 @@ class _PlanFormScreenState extends State<PlanFormScreen> {
                         _Mode.custom => 'What’s it for?',
                       },
                       style: const TextStyle(
-                        fontSize: 28,
+                        fontFamily: AppTheme.displayFont,
+                        fontFamilyFallback: AppTheme.displayFallback,
+                        fontSize: 31,
                         fontWeight: FontWeight.w800,
-                        letterSpacing: -0.6,
+                        letterSpacing: 0.2,
                         color: _navy,
                       ),
                     ),
@@ -762,11 +765,7 @@ class _ModeTabs extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(22),
-              gradient: selected
-                  ? const LinearGradient(
-                      colors: [Color(0xFF2F8CF5), Color(0xFF5DB2F8)],
-                    )
-                  : null,
+              color: selected ? AppColors.lime : null,
             ),
             alignment: Alignment.center,
             child: Text(
@@ -774,7 +773,7 @@ class _ModeTabs extends StatelessWidget {
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                color: selected ? Colors.white : _navy,
+                color: selected ? AppColors.forest : _navy,
               ),
             ),
           ),

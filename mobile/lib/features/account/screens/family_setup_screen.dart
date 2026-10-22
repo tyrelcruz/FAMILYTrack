@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/features/account/providers/session_provider.dart';
 import 'package:finance_tracker/features/account/screens/account_screen.dart';
@@ -29,9 +30,11 @@ class FamilySetupScreen extends StatelessWidget {
                     child: Text(
                       'Hi ${name.split(' ').first}!',
                       style: const TextStyle(
-                        fontSize: 32,
+                        fontFamily: AppTheme.displayFont,
+                        fontFamilyFallback: AppTheme.displayFallback,
+                        fontSize: 36,
                         fontWeight: FontWeight.w700,
-                        letterSpacing: -0.8,
+                        letterSpacing: 0.2,
                         color: AppColors.textPrimary,
                       ),
                     ),

@@ -1,3 +1,4 @@
+import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -46,9 +47,11 @@ Future<void> showFormSheet(
                       Text(
                         title,
                         style: const TextStyle(
-                          fontSize: 24,
+                          fontFamily: AppTheme.displayFont,
+                          fontFamilyFallback: AppTheme.displayFallback,
+                          fontSize: 27,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: -0.5,
+                          letterSpacing: 0.2,
                           color: AppColors.textPrimary,
                         ),
                       ),
@@ -171,9 +174,11 @@ class SheetAmountField extends StatelessWidget {
         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
       ],
       style: const TextStyle(
-        fontSize: 30,
+        fontFamily: AppTheme.displayFont,
+        fontFamilyFallback: AppTheme.displayFallback,
+        fontSize: 34,
         fontWeight: FontWeight.w700,
-        letterSpacing: -0.8,
+        letterSpacing: 0.2,
         color: AppColors.textPrimary,
       ),
       decoration: sheetInputDecoration(
@@ -183,7 +188,9 @@ class SheetAmountField extends StatelessWidget {
           child: Text(
             '₱',
             style: TextStyle(
-              fontSize: 30,
+              fontFamily: AppTheme.displayFont,
+              fontFamilyFallback: AppTheme.displayFallback,
+              fontSize: 34,
               fontWeight: FontWeight.w700,
               color: AppColors.textMuted,
             ),
@@ -220,15 +227,15 @@ class SheetPrimaryButton extends StatelessWidget {
       child: FilledButton(
         onPressed: busy ? null : onPressed,
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.textPrimary,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: AppColors.textPrimary.withValues(alpha: 0.6),
-          disabledForegroundColor: Colors.white,
+          backgroundColor: AppColors.lime,
+          foregroundColor: AppColors.forest,
+          disabledBackgroundColor: AppColors.lime.withValues(alpha: 0.55),
+          disabledForegroundColor: AppColors.forest,
           shape: const StadiumBorder(),
           textStyle: const TextStyle(
             fontFamily: 'PlusJakartaSans',
             fontSize: 17,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
         ),
         child: busy
@@ -237,7 +244,7 @@ class SheetPrimaryButton extends StatelessWidget {
                 height: 22,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  color: Colors.white,
+                  color: AppColors.forest,
                 ),
               )
             : Text(label),

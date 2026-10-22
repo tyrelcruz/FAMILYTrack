@@ -177,32 +177,21 @@ class _QuickAddMenu extends StatelessWidget {
               width: 74,
               height: 60,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF7DB4F4), Color(0xFF9AD4F6)],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.accentBlue.withValues(alpha: 0.35),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(22),
+                color: AppColors.lime,
               ),
               child: Material(
                 type: MaterialType.transparency,
                 child: InkWell(
                   onTap: () => Navigator.of(context).pop(),
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(22),
                   child: RotationTransition(
                     // The "+" spins into an "X" as the menu opens.
                     turns: Tween(begin: -0.125, end: 0.0).animate(button),
                     child: const Icon(
                       Icons.close_rounded,
-                      color: Colors.white,
-                      size: 28,
+                      color: AppColors.forest,
+                      size: 30,
                       weight: 300,
                     ),
                   ),

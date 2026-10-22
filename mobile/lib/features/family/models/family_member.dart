@@ -24,7 +24,7 @@ class FamilyMember {
   static const palette = <Color>[
     AppColors.blue,
     AppColors.purple,
-    AppColors.green,
+    Color(0xFF0E8FB8),
     AppColors.orange,
     AppColors.red,
     Color(0xFF00ACC1),
