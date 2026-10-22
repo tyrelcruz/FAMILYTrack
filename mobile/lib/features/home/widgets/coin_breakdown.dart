@@ -171,7 +171,7 @@ class _CoinBreakdownState extends State<CoinBreakdown> {
                     'No income or\nspending yet\nthis month',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 12,
                       height: 1.35,
                       fontWeight: FontWeight.w600,
                       color: Colors.white.withValues(alpha: 0.7),
@@ -229,7 +229,7 @@ class _Pill extends StatelessWidget {
     ),
     child: Text(
       text,
-      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: fg),
+      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: fg),
     ),
   );
 }

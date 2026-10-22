@@ -115,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: const TextStyle(
                       fontFamily: AppTheme.displayFont,
                       fontFamilyFallback: AppTheme.displayFallback,
-                      fontSize: 30,
+                      fontSize: 22,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.3,
                       color: Colors.white,
@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             '$monthName 1 - $monthName $days',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 17, color: _softWhite),
+            style: const TextStyle(fontSize: 13, color: _softWhite),
           ),
           const SizedBox(height: 10),
           Center(
@@ -163,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 : (isPast ? 'Month ended' : 'Hasn’t started'),
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               color: AppColors.lime,
             ),
@@ -199,14 +199,30 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const SizedBox(height: 10),
-          Row(
-            children: [
-              const Spacer(flex: 22),
-              _InOut(label: 'In', amount: income),
-              const Spacer(flex: 14),
-              _InOut(label: 'Out', amount: out),
-              const Spacer(flex: 22),
-            ],
+          // Centered under each coin stack (same 36% / 64% as the stacks).
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: LayoutBuilder(
+              builder: (context, c) => SizedBox(
+                height: 48,
+                child: Stack(
+                  children: [
+                    for (final (x, label, amount) in [
+                      (0.36, 'In', income),
+                      (0.64, 'Out', out),
+                    ])
+                      Positioned(
+                        left: c.maxWidth * x,
+                        top: 0,
+                        child: FractionalTranslation(
+                          translation: const Offset(-0.5, 0),
+                          child: _InOut(label: label, amount: amount),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: 34),
           // ── White sheet ──────────────────────────────────────────────
@@ -275,7 +291,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         const SizedBox(width: 8),
                                         const Icon(
                                           Icons.edit_outlined,
-                                          size: 19,
+                                          size: 16,
                                           color: AppColors.forest,
                                         ),
                                       ],
@@ -371,7 +387,7 @@ const _tealGreen = Color(0xFF008577);
 const _darkBlue = Color(0xFF243B53);
 const _softWhite = Color(0xD9FFFFFF);
 
-const _captionStyle = TextStyle(fontSize: 17, color: AppColors.textSecondary);
+const _captionStyle = TextStyle(fontSize: 13, color: AppColors.textSecondary);
 
 /// "$1,274.87" with small cents over a caption, like the reference.
 class _Figure extends StatelessWidget {
@@ -390,7 +406,7 @@ class _Figure extends StatelessWidget {
     const big = TextStyle(
       fontFamily: AppTheme.displayFont,
       fontFamilyFallback: AppTheme.displayFallback,
-      fontSize: 36,
+      fontSize: 28,
       fontWeight: FontWeight.w800,
       color: AppColors.textPrimary,
       height: 1.1,
@@ -403,7 +419,7 @@ class _Figure extends StatelessWidget {
             TextSpan(
               children: [
                 TextSpan(text: whole),
-                TextSpan(text: cents, style: big.copyWith(fontSize: 19)),
+                TextSpan(text: cents, style: big.copyWith(fontSize: 15)),
               ],
             ),
             style: big,
@@ -425,14 +441,14 @@ class _InOut extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      Text(label, style: const TextStyle(fontSize: 24, color: _softWhite)),
+      Text(label, style: const TextStyle(fontSize: 14, color: _softWhite)),
       const SizedBox(height: 2),
       Text(
         formatAmount(amount.roundToDouble()),
         style: const TextStyle(
           fontFamily: AppTheme.displayFont,
           fontFamilyFallback: AppTheme.displayFallback,
-          fontSize: 28,
+          fontSize: 20,
           fontWeight: FontWeight.w800,
           color: Colors.white,
         ),
@@ -485,7 +501,7 @@ class _TopIcon extends StatelessWidget {
     icon: Stack(
       clipBehavior: Clip.none,
       children: [
-        Icon(icon, color: Colors.white, size: 30),
+        Icon(icon, color: Colors.white, size: 26),
         if (dot)
           Positioned(
             right: 1,
@@ -541,7 +557,7 @@ class _TipCard extends StatelessWidget {
             child: Text(
               text,
               style: const TextStyle(
-                fontSize: 17,
+                fontSize: 14,
                 height: 1.3,
                 color: AppColors.textPrimary,
               ),
@@ -593,7 +609,7 @@ class _SectionTitle extends StatelessWidget {
               style: const TextStyle(
                 fontFamily: AppTheme.displayFont,
                 fontFamilyFallback: AppTheme.displayFallback,
-                fontSize: 26,
+                fontSize: 19,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.3,
                 color: AppColors.textPrimary,
@@ -602,7 +618,7 @@ class _SectionTitle extends StatelessWidget {
           ),
           const Icon(
             Icons.arrow_forward_rounded,
-            size: 30,
+            size: 24,
             color: AppColors.textPrimary,
           ),
         ],
@@ -638,7 +654,7 @@ class _InsightsPage extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: AppTheme.displayFont,
                       fontFamilyFallback: AppTheme.displayFallback,
-                      fontSize: 25,
+                      fontSize: 20,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
                     ),

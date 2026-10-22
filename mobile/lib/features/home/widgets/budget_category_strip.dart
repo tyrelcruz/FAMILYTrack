@@ -125,7 +125,7 @@ class _BudgetCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontSize: 14.5,
+              fontSize: 12.5,
               color: AppColors.textSecondary,
             ),
           ),
@@ -149,7 +149,7 @@ class _BudgetCard extends StatelessWidget {
                   TextSpan(
                     text: format(progress.spent),
                     style: const TextStyle(
-                      fontSize: 19,
+                      fontSize: 14,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.4,
                       color: AppColors.textPrimary,
@@ -158,7 +158,7 @@ class _BudgetCard extends StatelessWidget {
                   TextSpan(
                     text: '  / ${format(b.limit)}',
                     style: const TextStyle(
-                      fontSize: 13.5,
+                      fontSize: 12,
                       color: AppColors.textMuted,
                     ),
                   ),
@@ -203,7 +203,7 @@ class _AddCard extends StatelessWidget {
           Text(
             'New Budget',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),
@@ -211,7 +211,7 @@ class _AddCard extends StatelessWidget {
           SizedBox(height: 6),
           Text(
             'Set a monthly limit for a category.',
-            style: TextStyle(fontSize: 13.5, color: AppColors.textMuted),
+            style: TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
         ],
       ),

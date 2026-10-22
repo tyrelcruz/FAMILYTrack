@@ -77,7 +77,7 @@ class ActivityRow extends StatelessWidget {
                           who.initial,
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 11.5,
+                            fontSize: 10.5,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -99,7 +99,7 @@ class ActivityRow extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 17,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
                           ),
@@ -125,7 +125,7 @@ class ActivityRow extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 14.5,
+                            fontSize: 12.5,
                             color: AppColors.textSecondary,
                           ),
                         ),
@@ -145,7 +145,7 @@ class ActivityRow extends StatelessWidget {
                             ? formatTime(item.date)
                             : formatShortDay(item.date),
                         style: const TextStyle(
-                          fontSize: 14.5,
+                          fontSize: 12.5,
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -158,7 +158,7 @@ class ActivityRow extends StatelessWidget {
             Text(
               '${item.isExpense ? '-' : '+'}${format(item.amount)}',
               style: TextStyle(
-                fontSize: 17,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
                 color: item.isExpense ? AppColors.expenseRed : AppColors.green,
               ),
