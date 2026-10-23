@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 
 import 'package:finance_tracker/features/plans/data/plan_repository.dart';
@@ -26,6 +28,7 @@ class PlanProvider extends ChangeNotifier {
   }
 
   Future<void> load() async {
+    await _repo.importLegacyCovers();
     _plans = await _repo.all();
     loading = false;
     notifyListeners();
@@ -33,6 +36,19 @@ class PlanProvider extends ChangeNotifier {
 
   Future<void> save(Plan p) async {
     p.id == null ? await _repo.insert(p) : await _repo.update(p);
+    await load();
+    onLocalChange?.call();
+  }
+
+  /// Sets [photo] as the plan's cover; sync uploads it for the family.
+  Future<void> setCover(String planId, File photo) async {
+    await _repo.setCover(planId, photo);
+    await load();
+    onLocalChange?.call();
+  }
+
+  Future<void> removeCover(String planId) async {
+    await _repo.removeCover(planId);
     await load();
     onLocalChange?.call();
   }

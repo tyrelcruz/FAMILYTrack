@@ -19,6 +19,15 @@ const loginBody = z.object({
   password: z.string(),
 });
 
+const profileBody = z.object({
+  name: z.string().trim().min(1).max(80),
+});
+
+const passwordBody = z.object({
+  current: z.string(),
+  next: z.string().min(8).max(200),
+});
+
 export function authRoutes(db: Db) {
   const router = Router();
 
@@ -76,6 +85,41 @@ export function authRoutes(db: Db) {
         memberId: g.member_id,
       })),
     });
+  });
+
+  /** Renames the account and the user's member row in every family. */
+  router.patch('/me', requireAuth, (req, res) => {
+    const { name } = profileBody.parse(req.body);
+    const userId = currentUserId(res);
+    const now = Date.now();
+    run(db, 'UPDATE users SET name = ? WHERE id = ?', name, userId);
+    run(
+      db,
+      'UPDATE members SET name = ?, updated_at = ? WHERE user_id = ? AND deleted_at IS NULL',
+      name,
+      now,
+      userId,
+    );
+    const user = one<UserRow>(db, 'SELECT * FROM users WHERE id = ?', userId);
+    if (!user) throw new HttpError(401, 'Sign in required');
+    res.json({ user: userJson(user) });
+  });
+
+  router.post('/me/password', requireAuth, async (req, res) => {
+    const body = passwordBody.parse(req.body);
+    const userId = currentUserId(res);
+    const user = one<UserRow>(db, 'SELECT * FROM users WHERE id = ?', userId);
+    if (!user) throw new HttpError(401, 'Sign in required');
+    if (!(await bcrypt.compare(body.current, user.password_hash))) {
+      throw new HttpError(400, 'Current password is wrong');
+    }
+    run(
+      db,
+      'UPDATE users SET password_hash = ? WHERE id = ?',
+      await bcrypt.hash(body.next, 10),
+      userId,
+    );
+    res.status(204).end();
   });
 
   return router;

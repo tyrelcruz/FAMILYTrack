@@ -1,8 +1,9 @@
-import { Router } from 'express';
+import express, { Router } from 'express';
 import { z } from 'zod';
 
 import { logActivity } from '../db/activity.js';
 import { many, one, run, transaction, type Db } from '../db/database.js';
+import { looksLikeImage, type BlobStore } from '../lib/blob-store.js';
 import { HttpError, notFound } from '../lib/http.js';
 import { newId } from '../lib/ids.js';
 import { PAYMENT_METHODS, planJson, type PlanRow } from '../lib/models.js';
@@ -34,8 +35,11 @@ const createBody = z.object({
 });
 const updateBody = z.object(fields).partial();
 
+const coverKey = (groupId: string, planId: string) =>
+  `${groupId}/covers/${planId}`;
+
 /** Mounted under /groups/:groupId/plans. */
-export function planRoutes(db: Db) {
+export function planRoutes(db: Db, blobs: BlobStore) {
   const router = Router({ mergeParams: true });
 
   const find = (groupId: string, id: string) => {
@@ -85,6 +89,7 @@ export function planRoutes(db: Db) {
       created_by: currentUserId(res),
       created_at: now,
       updated_at: now,
+      has_cover: 0,
       deleted_at: null,
     };
     run(
@@ -155,6 +160,49 @@ export function planRoutes(db: Db) {
     res.json({ plan: planJson(updated) });
   });
 
+  // ── Cover photos ─────────────────────────────────────────────────────
+
+  /** Stores the request body (an image) as this plan's cover. */
+  router.put(
+    '/:planId/cover',
+    express.raw({ type: ['image/*', 'application/octet-stream'], limit: '6mb' }),
+    (req, res) => {
+      const p = find(currentMember(res).group_id, String(req.params.planId));
+      const bytes = req.body;
+      if (!Buffer.isBuffer(bytes) || bytes.length === 0) {
+        throw new HttpError(400, 'Send the image as the request body');
+      }
+      if (!looksLikeImage(bytes)) throw new HttpError(400, 'That isn’t an image');
+      blobs.put(coverKey(p.group_id, p.id), bytes);
+      run(
+        db,
+        'UPDATE plans SET has_cover = 1, updated_at = ? WHERE id = ?',
+        Date.now(),
+        p.id,
+      );
+      res.status(204).end();
+    },
+  );
+
+  router.get('/:planId/cover', (req, res) => {
+    const p = find(currentMember(res).group_id, String(req.params.planId));
+    const file = blobs.path(coverKey(p.group_id, p.id));
+    if (!p.has_cover || !file) throw notFound('Cover');
+    res.type('image/jpeg').sendFile(file);
+  });
+
+  router.delete('/:planId/cover', (req, res) => {
+    const p = find(currentMember(res).group_id, String(req.params.planId));
+    blobs.remove(coverKey(p.group_id, p.id));
+    run(
+      db,
+      'UPDATE plans SET has_cover = 0, updated_at = ? WHERE id = ?',
+      Date.now(),
+      p.id,
+    );
+    res.status(204).end();
+  });
+
   /** Removes the plan; its expenses stay as normal transactions. */
   router.delete('/:planId', (req, res) => {
     const p = find(currentMember(res).group_id, String(req.params.planId));
@@ -180,6 +228,7 @@ export function planRoutes(db: Db) {
         p.id,
       );
     });
+    blobs.remove(coverKey(p.group_id, p.id));
     res.status(204).end();
   });
 

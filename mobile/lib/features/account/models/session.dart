@@ -19,6 +19,7 @@ class Session {
   final int? lastSync;
 
   Session copyWith({
+    String? name,
     LinkedGroup? group,
     bool clearGroup = false,
     int? lastSync,
@@ -26,7 +27,7 @@ class Session {
   }) => Session(
     token: token,
     userId: userId,
-    name: name,
+    name: name ?? this.name,
     email: email,
     group: clearGroup ? null : (group ?? this.group),
     lastSync: clearLastSync ? null : (lastSync ?? this.lastSync),

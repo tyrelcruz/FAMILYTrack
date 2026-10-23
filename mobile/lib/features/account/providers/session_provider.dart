@@ -130,6 +130,25 @@ class SessionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ── Profile ──────────────────────────────────────────────────────────
+
+  /// Renames the account; the server renames its family member too.
+  Future<void> updateName(String name) async {
+    final res = await _api.patch('/me', {'name': name.trim()});
+    final user = res['user'] as Map<String, dynamic>;
+    await _setSession(_session!.copyWith(name: user['name'] as String));
+    if (linked) await sync();
+  }
+
+  Future<void> changePassword(String current, String next) =>
+      _api.post('/me/password', {'current': current, 'next': next});
+
+  /// Owner only.
+  Future<void> renameGroup(String name) async {
+    await _api.patch('/groups/${group!.id}', {'name': name.trim()});
+    await _refreshGroup();
+  }
+
   // ── Family ───────────────────────────────────────────────────────────
 
   /// Creates a family; with [keepLocalData] what's already on this phone

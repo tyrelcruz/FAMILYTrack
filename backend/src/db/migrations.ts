@@ -162,4 +162,8 @@ export const migrations: string[] = [
   -- A receipt or photo per transaction; the image file lives on disk.
   ALTER TABLE transactions ADD COLUMN has_photo INTEGER NOT NULL DEFAULT 0;
   `,
+  `
+  -- A cover photo per plan; the image file lives on disk.
+  ALTER TABLE plans ADD COLUMN has_cover INTEGER NOT NULL DEFAULT 0;
+  `,
 ];

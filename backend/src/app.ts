@@ -6,6 +6,7 @@ import cors from 'cors';
 import express from 'express';
 
 import type { Db } from './db/database.js';
+import { diskBlobStore } from './lib/blob-store.js';
 import { errorHandler, unknownRoute } from './lib/http.js';
 import { requireAuth, requireGroupMember } from './middleware/auth.js';
 import { authRoutes } from './routes/auth.js';
@@ -22,6 +23,7 @@ export function createApp(
   // Where receipt photos are kept; a throwaway folder unless given.
   photosDir: string = mkdtempSync(join(tmpdir(), 'familytrack-photos-')),
 ) {
+  const blobs = diskBlobStore(photosDir);
   const app = express();
   app.disable('x-powered-by');
   app.use(cors());
@@ -38,9 +40,9 @@ export function createApp(
 
   const inGroup = requireGroupMember(db);
   api.use('/groups/:groupId/members', inGroup, memberRoutes(db));
-  api.use('/groups/:groupId/transactions', inGroup, transactionRoutes(db, photosDir));
+  api.use('/groups/:groupId/transactions', inGroup, transactionRoutes(db, blobs));
   api.use('/groups/:groupId/budgets', inGroup, budgetRoutes(db));
-  api.use('/groups/:groupId/plans', inGroup, planRoutes(db));
+  api.use('/groups/:groupId/plans', inGroup, planRoutes(db, blobs));
   api.use('/groups/:groupId/transfers', inGroup, transferRoutes(db));
   api.use('/groups/:groupId/sync', inGroup, syncRoutes(db));
 

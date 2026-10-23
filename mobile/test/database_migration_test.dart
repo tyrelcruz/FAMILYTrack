@@ -184,4 +184,48 @@ void main() {
     await db.close();
     await dir.delete(recursive: true);
   });
+
+  test('v8 plans gain cover columns without losing data', () async {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+    final dir = await Directory.systemTemp.createTemp('ft_migration_v8');
+    final path = '${dir.path}/finance_tracker.db';
+    final old = await openDatabase(
+      path,
+      version: 8,
+      onCreate: (db, _) async {
+        await db.execute('''
+          CREATE TABLE plans (
+            id TEXT PRIMARY KEY, name TEXT NOT NULL, kind TEXT NOT NULL,
+            start_date INTEGER NOT NULL, end_date INTEGER NOT NULL,
+            funds TEXT NOT NULL, shares TEXT NOT NULL, split TEXT NOT NULL,
+            created_by TEXT, destination TEXT NOT NULL DEFAULT '',
+            description TEXT NOT NULL DEFAULT '',
+            dirty INTEGER NOT NULL DEFAULT 1, synced INTEGER NOT NULL DEFAULT 0,
+            deleted INTEGER NOT NULL DEFAULT 0)
+        ''');
+      },
+    );
+    await old.insert('plans', {
+      'id': 'p1',
+      'name': 'Baguio',
+      'kind': 'trip',
+      'start_date': 0,
+      'end_date': 0,
+      'funds': '{}',
+      'shares': '{}',
+      'split': 'equal',
+    });
+    await old.close();
+
+    AppDatabase.resetForTests(path);
+    final db = await AppDatabase.instance;
+    final plan = (await db.query('plans')).single;
+    expect(plan['name'], 'Baguio');
+    expect(plan['has_cover'], 0);
+    expect(plan['cover_dirty'], 0);
+    expect(plan['cover_path'], isNull);
+    await db.close();
+    await dir.delete(recursive: true);
+  });
 }

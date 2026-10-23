@@ -23,6 +23,8 @@ class Plan {
     this.createdBy,
     this.destination = '',
     this.description = '',
+    this.coverPath,
+    this.hasCover = false,
   });
 
   /// UUID; null until saved.
@@ -47,6 +49,11 @@ class Plan {
   /// Where it is, e.g. "Tokyo, Japan"; empty when it isn't somewhere.
   final String destination;
   final String description;
+
+  /// Cover photo on this phone, and whether the server has one. Kept out of
+  /// [toMap] so editing a plan never touches them.
+  final String? coverPath;
+  final bool hasCover;
 
   double get total => funds.values.fold(0.0, (s, v) => s + v);
 
@@ -93,6 +100,8 @@ class Plan {
     createdBy: createdBy,
     destination: destination,
     description: description,
+    coverPath: coverPath,
+    hasCover: hasCover,
   );
 
   Map<String, Object?> toMap() => {
@@ -121,6 +130,8 @@ class Plan {
     createdBy: m['created_by'] as String?,
     destination: (m['destination'] as String?) ?? '',
     description: (m['description'] as String?) ?? '',
+    coverPath: m['cover_path'] as String?,
+    hasCover: (m['has_cover'] as int? ?? 0) == 1,
   );
 
   /// Shape the sync API sends and accepts.

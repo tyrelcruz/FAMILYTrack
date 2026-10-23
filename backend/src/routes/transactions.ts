@@ -1,11 +1,9 @@
-import { mkdirSync, rmSync, existsSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-
 import express, { Router } from 'express';
 import { z } from 'zod';
 
 import { isRecent, logActivity } from '../db/activity.js';
 import { many, one, run, type Db } from '../db/database.js';
+import { looksLikeImage, type BlobStore } from '../lib/blob-store.js';
 import { HttpError, notFound } from '../lib/http.js';
 import { newId } from '../lib/ids.js';
 import {
@@ -50,7 +48,7 @@ const listQuery = z.object({
 });
 
 /** Mounted under /groups/:groupId/transactions. */
-export function transactionRoutes(db: Db, photosDir: string) {
+export function transactionRoutes(db: Db, blobs: BlobStore) {
   const router = Router({ mergeParams: true });
 
   const assertMemberInGroup = (groupId: string, memberId: string | null | undefined) => {
@@ -228,8 +226,7 @@ export function transactionRoutes(db: Db, photosDir: string) {
 
   // ── Receipt photos ───────────────────────────────────────────────────
 
-  const photoFile = (groupId: string, id: string) =>
-    join(photosDir, groupId, `${id}.jpg`);
+  const photoKey = (groupId: string, id: string) => `${groupId}/${id}`;
 
   /** Stores the request body (an image) as this transaction's photo. */
   router.put(
@@ -242,17 +239,8 @@ export function transactionRoutes(db: Db, photosDir: string) {
       if (!Buffer.isBuffer(bytes) || bytes.length === 0) {
         throw new HttpError(400, 'Send the image as the request body');
       }
-      // JPEG, PNG, WebP or HEIC only; never trust the declared type.
-      const head = bytes.subarray(0, 12);
-      const looksLikeImage =
-        (head[0] === 0xff && head[1] === 0xd8) ||
-        head.subarray(1, 4).toString() === 'PNG' ||
-        (head.subarray(0, 4).toString() === 'RIFF' &&
-          head.subarray(8, 12).toString() === 'WEBP') ||
-        head.subarray(4, 8).toString() === 'ftyp';
-      if (!looksLikeImage) throw new HttpError(400, 'That isn’t an image');
-      mkdirSync(join(photosDir, groupId), { recursive: true });
-      writeFileSync(photoFile(groupId, t.id), bytes);
+      if (!looksLikeImage(bytes)) throw new HttpError(400, 'That isn’t an image');
+      blobs.put(photoKey(groupId, t.id), bytes);
       run(
         db,
         'UPDATE transactions SET has_photo = 1, updated_at = ? WHERE id = ?',
@@ -266,15 +254,15 @@ export function transactionRoutes(db: Db, photosDir: string) {
   router.get('/:transactionId/photo', (req, res) => {
     const groupId = currentMember(res).group_id;
     const t = find(groupId, String(req.params.transactionId));
-    const file = photoFile(groupId, t.id);
-    if (!t.has_photo || !existsSync(file)) throw notFound('Photo');
+    const file = blobs.path(photoKey(groupId, t.id));
+    if (!t.has_photo || !file) throw notFound('Photo');
     res.type('image/jpeg').sendFile(file);
   });
 
   router.delete('/:transactionId/photo', (req, res) => {
     const groupId = currentMember(res).group_id;
     const t = find(groupId, String(req.params.transactionId));
-    rmSync(photoFile(groupId, t.id), { force: true });
+    blobs.remove(photoKey(groupId, t.id));
     run(
       db,
       'UPDATE transactions SET has_photo = 0, updated_at = ? WHERE id = ?',

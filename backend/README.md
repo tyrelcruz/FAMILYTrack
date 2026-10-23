@@ -66,6 +66,7 @@ Group routes return 404 to anyone outside the group.
 | POST | `/groups/:groupId/transactions` | `{title, amount, type, categoryId, date, note?, memberId?, planId?, paymentMethod?, id?}` |
 | PATCH / DELETE | `/groups/:groupId/transactions/:id` | Partial update / soft delete |
 | PUT / GET / DELETE | `/groups/:groupId/transactions/:id/photo` | Receipt photo: PUT the image bytes (JPEG/PNG/WebP/HEIC, up to 6 MB); `hasPhoto` shows in sync. Files live in `photos/` next to the database. |
+| PUT / GET / DELETE | `/groups/:groupId/plans/:id/cover` | Plan cover photo, same rules as receipts; `hasCover` shows in sync. Files live in `photos/<groupId>/covers/`. |
 | GET | `/groups/:groupId/budgets` | |
 | PUT / DELETE | `/groups/:groupId/budgets/:categoryId` | `{limit}`; `categoryId` may be `overall` |
 | GET / POST | `/groups/:groupId/plans` | `{name, kind, startDate, endDate, funds, shares, split, id?}` |

@@ -1,0 +1,31 @@
+# Runs the API plus Caddy, which gets a free HTTPS certificate for $DOMAIN.
+# Everything the server keeps (database + photos) lives in the ft-data volume.
+services:
+  api:
+    build: ../backend
+    restart: unless-stopped
+    environment:
+      PORT: "3001"
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in deploy/.env}
+      DATABASE_PATH: /data/familytrack.db
+    volumes:
+      - ft-data:/data
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in deploy/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on:
+      - api
+
+volumes:
+  ft-data:
+  caddy-data:

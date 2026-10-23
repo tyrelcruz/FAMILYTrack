@@ -65,6 +65,7 @@ export interface PlanRow {
   split: 'equal' | 'custom';
   destination: string;
   description: string;
+  has_cover: number;
   created_by: string;
   created_at: number;
   updated_at: number;
@@ -164,6 +165,7 @@ export const planJson = (p: PlanRow) => ({
   split: p.split,
   destination: p.destination,
   description: p.description,
+  hasCover: p.has_cover === 1,
   createdBy: p.created_by,
   updatedAt: p.updated_at,
   deleted: p.deleted_at !== null,

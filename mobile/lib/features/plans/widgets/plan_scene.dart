@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'package:finance_tracker/features/plans/models/destination.dart';
@@ -15,6 +17,18 @@ class PlanScene extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final path = plan.coverPath;
+    if (path == null) return _scene();
+    return Image.file(
+      File(path),
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      errorBuilder: (context, error, stack) => _scene(),
+    );
+  }
+
+  Widget _scene() {
     final style = plan.kind == PlanKind.monthly
         ? SceneStyle.city
         : Destination.find(plan.destination)?.style ??

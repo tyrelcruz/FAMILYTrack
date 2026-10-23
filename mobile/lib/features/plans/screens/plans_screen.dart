@@ -70,8 +70,9 @@ class _PlansScreenState extends State<PlansScreen> {
           _ => b.end.compareTo(a.end),
         };
       });
-    final featured = shown.isEmpty ? null : shown.first;
-    final rest = shown.skip(1).toList();
+    // On or coming up: a sideways strip up top. Everything else: slim rows.
+    final strip = shown.where((p) => rank(p) < 2).take(6).toList();
+    final rest = shown.where((p) => !strip.contains(p)).toList();
     double spent(Plan p) => PlanStats.of(p, finance.all, family).spent;
 
     final activeCount = shown.where((p) => p.isActive(now)).length;
@@ -106,24 +107,23 @@ class _PlansScreenState extends State<PlansScreen> {
                 onChanged: (i) => setState(() => _shared = i == 1),
               ),
               const SizedBox(height: 18),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: featured == null
-                    ? _EmptyTab(
-                        shared: _shared,
-                        onCreate: () => _push(const PlanFormScreen()),
-                      )
-                    : FeaturedPlanCard(
-                        plan: featured,
-                        spent: spent(featured),
-                        members: [
-                          for (final m in family.members)
-                            if (featured.shares.containsKey(m.id)) m,
-                        ],
-                        onTap: () =>
-                            _push(PlanDetailScreen(planId: featured.id!)),
-                      ),
-              ),
+              if (shown.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _EmptyTab(
+                    shared: _shared,
+                    onCreate: () => _push(const PlanFormScreen()),
+                  ),
+                )
+              else if (strip.isNotEmpty)
+                _PlanStrip(
+                  // Fresh position when switching tabs.
+                  key: ValueKey(_shared),
+                  plans: strip,
+                  spent: spent,
+                  memberCount: (p) => p.shares.length,
+                  onOpen: (p) => _push(PlanDetailScreen(planId: p.id!)),
+                ),
             ],
           ),
           FloatingCard(
@@ -132,18 +132,40 @@ class _PlansScreenState extends State<PlansScreen> {
               children: [
                 if (rest.isNotEmpty) ...[
                   CardHeading(
-                    _shared ? 'Shared With Me' : 'More Plans',
+                    strip.isEmpty
+                        ? (_shared ? 'Shared With Me' : 'Your Plans')
+                        : 'Earlier & More',
                     trailing: '${rest.length}',
                   ),
-                  for (final p in rest)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                      child: PlanListCard(
-                        plan: p,
-                        spent: spent(p),
-                        onTap: () => _push(PlanDetailScreen(planId: p.id!)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Container(
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: AppColors.divider),
+                      ),
+                      child: Column(
+                        children: [
+                          for (var i = 0; i < rest.length; i++) ...[
+                            if (i > 0)
+                              const Divider(
+                                height: 1,
+                                indent: 70,
+                                color: AppColors.divider,
+                              ),
+                            PlanRow(
+                              plan: rest[i],
+                              spent: spent(rest[i]),
+                              onTap: () =>
+                                  _push(PlanDetailScreen(planId: rest[i].id!)),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
+                  ),
                 ],
                 CardHeading(
                   'Plan Templates',
@@ -162,6 +184,89 @@ class _PlansScreenState extends State<PlansScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Sideways strip of plan cards that snap one at a time, the next one
+/// peeking in; dots show where you are once there's more than one.
+class _PlanStrip extends StatefulWidget {
+  const _PlanStrip({
+    super.key,
+    required this.plans,
+    required this.spent,
+    required this.memberCount,
+    required this.onOpen,
+  });
+
+  final List<Plan> plans;
+  final double Function(Plan) spent;
+  final int Function(Plan) memberCount;
+  final ValueChanged<Plan> onOpen;
+
+  @override
+  State<_PlanStrip> createState() => _PlanStripState();
+}
+
+class _PlanStripState extends State<_PlanStrip> {
+  late final _controller = PageController(viewportFraction: 0.88);
+  int _page = 0;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final plans = widget.plans;
+    return Column(
+      children: [
+        SizedBox(
+          height: PlanStripCard.height,
+          child: PageView.builder(
+            controller: _controller,
+            padEnds: plans.length == 1,
+            itemCount: plans.length,
+            onPageChanged: (i) => setState(() => _page = i),
+            itemBuilder: (context, i) => Padding(
+              padding: EdgeInsets.fromLTRB(
+                plans.length == 1 ? 20 : (i == 0 ? 20 : 5),
+                0,
+                plans.length == 1 ? 20 : 5,
+                0,
+              ),
+              child: PlanStripCard(
+                plan: plans[i],
+                spent: widget.spent(plans[i]),
+                memberCount: widget.memberCount(plans[i]),
+                onTap: () => widget.onOpen(plans[i]),
+              ),
+            ),
+          ),
+        ),
+        if (plans.length > 1) ...[
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var i = 0; i < plans.length; i++)
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOutCubic,
+                  width: i == _page ? 16 : 6,
+                  height: 6,
+                  margin: const EdgeInsets.symmetric(horizontal: 2.5),
+                  decoration: BoxDecoration(
+                    color: i == _page ? AppColors.teal : AppColors.mintTrack,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }

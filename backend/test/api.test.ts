@@ -4,6 +4,10 @@ import { after, before, describe, it } from 'node:test';
 
 import { createApp } from '../src/app.js';
 import { openDatabase } from '../src/db/database.js';
+import { diskBlobStore, looksLikeImage } from '../src/lib/blob-store.js';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 let base = '';
 let close: () => void;
@@ -355,6 +359,101 @@ describe('family sync API', () => {
     assert.equal(del.status, 204);
     const after = await fetch(url, { headers: { authorization: `Bearer ${owner}` } });
     assert.equal(after.status, 404);
+  });
+
+  it('recognises images by their bytes', () => {
+    const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0]);
+    const webp = Buffer.concat([Buffer.from('RIFF'), Buffer.alloc(4), Buffer.from('WEBP')]);
+    const heic = Buffer.concat([Buffer.alloc(4), Buffer.from('ftypheic')]);
+    for (const b of [Buffer.from([0xff, 0xd8, 0xff, 0xe0]), png, webp, heic]) {
+      assert.equal(looksLikeImage(b), true);
+    }
+    assert.equal(looksLikeImage(Buffer.from('hello world!!')), false);
+  });
+
+  it('keeps blobs on disk and refuses keys that escape', () => {
+    const store = diskBlobStore(mkdtempSync(join(tmpdir(), 'blobs-')));
+    store.put('g1/t1', Buffer.from('x'));
+    assert.ok(store.path('g1/t1'));
+    store.remove('g1/t1');
+    assert.equal(store.path('g1/t1'), null);
+    assert.throws(() => store.put('../evil', Buffer.from('x')));
+  });
+
+  it('stores a cover per plan', async () => {
+    const plan = await call('POST', `/groups/${groupId}/plans`, owner, {
+      name: 'Cover trip',
+      kind: 'trip',
+      startDate: Date.now(),
+      endDate: Date.now() + 86400000,
+      funds: { cash: 100 },
+      shares: {},
+      split: 'equal',
+    });
+    const id = plan.body.plan.id;
+    const url = `${base}/groups/${groupId}/plans/${id}/cover`;
+    const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    const put = (body: Buffer) =>
+      fetch(url, {
+        method: 'PUT',
+        headers: { authorization: `Bearer ${owner}`, 'content-type': 'image/jpeg' },
+        body: new Uint8Array(body),
+      });
+    const hasCover = async () => {
+      const sync = await call('GET', `/groups/${groupId}/sync`, partner);
+      return sync.body.plans.find((x: { id: string }) => x.id === id).hasCover;
+    };
+
+    assert.equal((await put(Buffer.from('not an image at all'))).status, 400);
+    assert.equal(await hasCover(), false);
+    assert.equal((await put(jpeg)).status, 204);
+    assert.equal(await hasCover(), true);
+
+    const got = await fetch(url, { headers: { authorization: `Bearer ${partner}` } });
+    assert.equal(got.status, 200);
+    assert.deepEqual(Buffer.from(await got.arrayBuffer()), jpeg);
+
+    const outsider = await register('Coverstranger');
+    assert.equal(
+      (await fetch(url, { headers: { authorization: `Bearer ${outsider}` } })).status,
+      404,
+    );
+
+    const del = await fetch(url, {
+      method: 'DELETE',
+      headers: { authorization: `Bearer ${owner}` },
+    });
+    assert.equal(del.status, 204);
+    assert.equal(await hasCover(), false);
+    assert.equal(
+      (await fetch(url, { headers: { authorization: `Bearer ${owner}` } })).status,
+      404,
+    );
+  });
+
+  it('edits the profile name and password', async () => {
+    const me = await register('Renamer');
+    const renamed = await call('PATCH', '/me', me, { name: 'Ren' });
+    assert.equal(renamed.status, 200);
+    assert.equal(renamed.body.user.name, 'Ren');
+    assert.equal((await call('PATCH', '/me', me, { name: ' ' })).status, 400);
+
+    const wrong = await call('POST', '/me/password', me, {
+      current: 'nope',
+      next: 'newpassword1',
+    });
+    assert.equal(wrong.status, 400);
+    const changed = await call('POST', '/me/password', me, {
+      current: 'password123',
+      next: 'newpassword1',
+    });
+    assert.equal(changed.status, 204);
+    const login = await call('POST', '/auth/login', undefined, {
+      email: 'renamer@example.com',
+      password: 'newpassword1',
+    });
+    assert.equal(login.status, 200);
+    assert.equal(login.body.user.name, 'Ren');
   });
 
   it('lets members leave and owners delete the group', async () => {

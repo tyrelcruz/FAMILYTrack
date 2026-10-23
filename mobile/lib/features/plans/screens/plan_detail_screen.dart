@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:finance_tracker/features/transactions/widgets/receipt_photo.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'package:finance_tracker/core/theme/app_theme.dart';
@@ -30,15 +32,8 @@ import 'package:finance_tracker/features/transactions/screens/add_transaction_sc
 import 'package:finance_tracker/features/transfers/models/transfer.dart';
 import 'package:finance_tracker/features/transfers/providers/transfer_provider.dart';
 import 'package:finance_tracker/features/transfers/screens/transfer_sheet.dart';
-import 'package:finance_tracker/features/transfers/widgets/transfer_row.dart';
 
 enum _Tab { transactions, members, details }
-
-const _navy = AppColors.textPrimary;
-const _sheetTop = Colors.white;
-const _sheetBottom = Colors.white;
-const _paleBlue = AppColors.mint;
-const _iconBlue = AppColors.forest;
 
 /// Trip or monthly plan overview: scene header, budget, quick actions, then
 /// transactions, members and details in tabs.
@@ -153,7 +148,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
         ),
         child: Icon(
           icon,
-          color: color == AppColors.textPrimary ? AppColors.blue : color,
+          color: color == AppColors.textPrimary ? AppColors.forest : color,
           size: 18,
         ),
       ),
@@ -199,6 +194,12 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                 ),
               option(
                 sheet,
+                Icons.image_outlined,
+                'Change cover photo',
+                () => _changeCover(plan),
+              ),
+              option(
+                sheet,
                 Icons.edit_outlined,
                 'Edit plan',
                 () => _push(PlanFormScreen(existing: plan)),
@@ -215,6 +216,21 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _changeCover(Plan plan) async {
+    final plans = context.read<PlanProvider>();
+    final choice = await chooseReceiptPhoto(
+      context,
+      canRemove: plan.coverPath != null,
+    );
+    if (choice == null || plan.id == null) return;
+    switch (choice) {
+      case PhotoPicked(:final file):
+        await plans.setCover(plan.id!, file);
+      case PhotoRemoved():
+        await plans.removeCover(plan.id!);
+    }
   }
 
   @override
@@ -255,7 +271,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
         statusBarColor: Colors.transparent,
       ),
       child: Scaffold(
-        backgroundColor: _sheetBottom,
+        backgroundColor: Colors.white,
         body: ListView(
           padding: EdgeInsets.only(bottom: bottom + 24),
           children: [
@@ -341,6 +357,11 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
       return m.userId != null && m.userId == myUserId ? 'You' : m.name;
     }
 
+    final days = <DateTime, List<Object>>{};
+    for (final (date, entry) in shown) {
+      days.putIfAbsent(DateUtils.dateOnly(date), () => []).add(entry);
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -353,21 +374,41 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
         ),
         if (entries.isEmpty)
           const EmptyState('No expenses yet — tap Add Expense'),
-        for (var i = 0; i < shown.length; i++) ...[
-          if (i > 0)
-            const Divider(height: 1, indent: 70, color: AppColors.divider),
-          switch (shown[i].$2) {
-            final TransactionItem e => _ExpenseLine(
-              item: e,
-              subtitle: '${formatShortDay(e.date)}  •  ${who(e.memberId)}',
-              onTap: () => _push(AddTransactionScreen(existing: e)),
+        // Grouped by day into white blocks, like Home's Recent Activity.
+        for (final MapEntry(key: day, value: list) in days.entries) ...[
+          _DayLabel(
+            day: day,
+            spent: list.whereType<TransactionItem>().fold(
+              0.0,
+              (sum, t) => sum + t.amount,
             ),
-            final Transfer t => TransferRow(
-              transfer: t,
-              onTap: () => showTransferSheet(context, existing: t),
-            ),
-            _ => const SizedBox.shrink(),
-          },
+          ),
+          _WhiteCard(
+            padded: false,
+            children: [
+              for (var i = 0; i < list.length; i++) ...[
+                if (i > 0)
+                  const Divider(
+                    height: 1,
+                    indent: 62,
+                    color: AppColors.divider,
+                  ),
+                switch (list[i]) {
+                  final TransactionItem e => _ExpenseLine(
+                    item: e,
+                    who: who(e.memberId),
+                    onTap: () => _push(AddTransactionScreen(existing: e)),
+                  ),
+                  final Transfer t => _TransferLine(
+                    transfer: t,
+                    onTap: () => showTransferSheet(context, existing: t),
+                  ),
+                  _ => const SizedBox.shrink(),
+                },
+              ],
+            ],
+          ),
+          const SizedBox(height: 14),
         ],
       ],
     );
@@ -739,14 +780,14 @@ class _BudgetCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: AppColors.divider),
         boxShadow: [
           BoxShadow(
-            color: _iconBlue.withValues(alpha: 0.08),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
+            color: AppColors.textPrimary.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -778,7 +819,7 @@ class _BudgetCard extends StatelessWidget {
                   fontSize: 29,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.2,
-                  color: over ? AppColors.expenseRed : _navy,
+                  color: over ? AppColors.expenseRed : AppColors.textPrimary,
                 ),
               ),
               Text(
@@ -797,8 +838,8 @@ class _BudgetCard extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(5),
                   child: Container(
-                    height: 10,
-                    color: AppColors.progressTrack,
+                    height: 8,
+                    color: AppColors.mintTrack,
                     alignment: Alignment.centerLeft,
                     child: FractionallySizedBox(
                       widthFactor: math.min(ratio, 1),
@@ -855,13 +896,21 @@ class _ActionButton extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 56,
-            height: 56,
-            decoration: const BoxDecoration(
-              color: _paleBlue,
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.white,
               shape: BoxShape.circle,
+              border: Border.all(color: AppColors.divider),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.textPrimary.withValues(alpha: 0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            child: Icon(icon, color: AppColors.blue, size: 22.5),
+            child: Icon(icon, color: AppColors.forest, size: 21),
           ),
           const SizedBox(height: 8),
           Text(
@@ -871,7 +920,7 @@ class _ActionButton extends StatelessWidget {
               fontSize: 11,
               height: 1.25,
               fontWeight: FontWeight.w500,
-              color: _navy,
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -933,93 +982,210 @@ class _Tabs extends StatelessWidget {
   }
 }
 
-/// Expense row as in the reference: tinted category circle, title,
-/// "Mar 15 • You", red amount.
+/// "Today" with the day's spending on the right, both quiet.
+class _DayLabel extends StatelessWidget {
+  const _DayLabel({required this.day, required this.spent});
+
+  final DateTime day;
+  final double spent;
+
+  @override
+  Widget build(BuildContext context) {
+    final today = DateUtils.dateOnly(DateTime.now());
+    final label = day == today
+        ? 'Today'
+        : day == today.subtract(const Duration(days: 1))
+        ? 'Yesterday'
+        : DateFormat('EEEE, MMM d').format(day);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const Spacer(),
+          if (spent > 0)
+            Text(
+              '−${formatAmount(spent)}',
+              style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Same row as Home's Recent Activity: neutral circle with a category-colored
+/// icon, title over "Category · Who", amount over the time.
 class _ExpenseLine extends StatelessWidget {
   const _ExpenseLine({
     required this.item,
-    required this.subtitle,
+    required this.who,
     required this.onTap,
   });
 
   final TransactionItem item;
-  final String subtitle;
+  final String who;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final cat = Category.byId(item.categoryId);
-    return InkWell(
+    return _Line(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        child: Row(
-          children: [
-            Container(
-              width: 54,
-              height: 54,
-              decoration: const BoxDecoration(
-                color: _paleBlue,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(cat.icon, color: _iconBlue, size: 20.5),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          item.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w600,
-                            color: _navy,
-                          ),
-                        ),
-                      ),
-                      if (item.hasAnyPhoto) ...[
-                        const SizedBox(width: 6),
-                        const Icon(
-                          Icons.photo_camera_outlined,
-                          size: 13,
-                          color: AppColors.textMuted,
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              '- ${formatAmount(item.amount)}',
-              style: const TextStyle(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w600,
-                color: AppColors.expenseRed,
-              ),
-            ),
-          ],
-        ),
-      ),
+      icon: Icon(cat.icon, color: cat.color, size: 17),
+      title: item.title,
+      photo: item.hasAnyPhoto,
+      meta: '${cat.name}  ·  $who',
+      amount: '−${formatAmount(item.amount)}',
+      time: formatTime(item.date),
     );
   }
+}
+
+/// A transfer in the same row style, with a grey icon and no sign.
+class _TransferLine extends StatelessWidget {
+  const _TransferLine({required this.transfer, required this.onTap});
+
+  final Transfer transfer;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final family = context.watch<FamilyProvider>();
+    final t = transfer;
+    final people = t.kind == TransferKind.people;
+    return _Line(
+      onTap: onTap,
+      icon: Icon(
+        people ? Icons.people_alt_outlined : Icons.swap_horiz_rounded,
+        color: AppColors.textSecondary,
+        size: 17,
+      ),
+      title: people
+          ? '${family.memberFor(t.fromMemberId).name} → '
+                '${family.memberFor(t.toMemberId).name}'
+          : '${t.fromMethod?.label ?? '?'} → ${t.toMethod?.label ?? '?'}',
+      meta: t.note.isNotEmpty ? t.note : (people ? 'Gave money' : 'Transfer'),
+      amount: formatAmount(t.amount),
+      amountColor: AppColors.textSecondary,
+      time: formatTime(t.date),
+    );
+  }
+}
+
+class _Line extends StatelessWidget {
+  const _Line({
+    required this.onTap,
+    required this.icon,
+    required this.title,
+    required this.meta,
+    required this.amount,
+    required this.time,
+    this.photo = false,
+    this.amountColor = AppColors.textPrimary,
+  });
+
+  final VoidCallback onTap;
+  final Widget icon;
+  final String title;
+  final String meta;
+  final String amount;
+  final String time;
+  final bool photo;
+  final Color amountColor;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(18),
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(14, 14, 16, 14),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: const BoxDecoration(
+              color: AppColors.background,
+              shape: BoxShape.circle,
+            ),
+            child: icon,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    if (photo) ...[
+                      const SizedBox(width: 5),
+                      const Icon(
+                        Icons.photo_camera_outlined,
+                        size: 12,
+                        color: AppColors.textMuted,
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  meta,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                amount,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: amountColor,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                time,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _SectionTitle extends StatelessWidget {
@@ -1034,7 +1200,7 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(2, 28, 2, 12),
+    padding: const EdgeInsets.fromLTRB(4, 28, 2, 12),
     child: Row(
       children: [
         Expanded(
@@ -1043,9 +1209,9 @@ class _SectionTitle extends StatelessWidget {
             style: const TextStyle(
               fontFamily: AppTheme.displayFont,
               fontFamilyFallback: AppTheme.displayFallback,
-              fontSize: 19,
+              fontSize: 16.5,
               fontWeight: FontWeight.w800,
-              letterSpacing: 0.4,
+              letterSpacing: 0.3,
               color: AppColors.textPrimary,
             ),
           ),
@@ -1064,7 +1230,7 @@ class _SectionTitle extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.blue,
+                color: AppColors.tealDark,
               ),
             ),
           ),
@@ -1074,18 +1240,24 @@ class _SectionTitle extends StatelessWidget {
   );
 }
 
+/// White block with a thin grey edge, like the cards on Home.
 class _WhiteCard extends StatelessWidget {
-  const _WhiteCard({required this.children});
+  const _WhiteCard({required this.children, this.padded = true});
 
   final List<Widget> children;
 
+  /// False for lists whose rows carry their own padding.
+  final bool padded;
+
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+    padding: padded
+        ? const EdgeInsets.symmetric(horizontal: 18, vertical: 6)
+        : EdgeInsets.zero,
     decoration: BoxDecoration(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(26),
-      boxShadow: AppColors.softShadow,
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: AppColors.divider),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1113,9 +1285,9 @@ class _WalletTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(22),
-        boxShadow: AppColors.softShadow,
+        border: Border.all(color: AppColors.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1177,7 +1349,7 @@ class _WalletTile extends StatelessWidget {
             child: LinearProgressIndicator(
               value: allocated == 0 ? 1 : math.min(spent / allocated, 1),
               minHeight: 5,
-              backgroundColor: AppColors.progressTrack,
+              backgroundColor: AppColors.mintTrack,
               color: over ? AppColors.expenseRed : method.color,
             ),
           ),
@@ -1266,7 +1438,7 @@ class _PersonRow extends StatelessWidget {
                               ? (spent > 0 ? 1 : 0)
                               : math.min(spent / share, 1),
                           minHeight: 5,
-                          backgroundColor: AppColors.progressTrack,
+                          backgroundColor: AppColors.mintTrack,
                           color: over ? AppColors.expenseRed : member.color,
                         ),
                       ),
@@ -1298,7 +1470,7 @@ class _PersonRow extends StatelessWidget {
   }
 }
 
-/// Frosted pale-blue panel that rises over the scene and holds everything
+/// White panel that rises over the scene and holds everything
 /// below it.
 class _Sheet extends StatelessWidget {
   const _Sheet({required this.top, required this.child});
@@ -1313,7 +1485,7 @@ class _Sheet extends StatelessWidget {
     child: Container(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
       decoration: BoxDecoration(
-        color: _sheetTop,
+        color: Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         // Same thin edge and soft shadow as the cards on the main tabs.
         border: const Border(top: BorderSide(color: AppColors.divider)),

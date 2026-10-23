@@ -379,6 +379,42 @@ void main() {
       isFalse,
     );
 
+    // Plan covers: phone → family, family → phone, and removing.
+    await plans.save(
+      Plan(
+        name: 'Cover trip',
+        kind: PlanKind.trip,
+        start: DateTime(2026, 11, 1),
+        end: DateTime(2026, 11, 2),
+        funds: const {PaymentMethod.cash: 100},
+        shares: const {},
+        split: SplitMode.equal,
+      ),
+    );
+    await session.sync();
+    final coverPlan = plans.plans.firstWhere((p) => p.name == 'Cover trip');
+    final coverShot = File(
+      '${(await Directory.systemTemp.createTemp('cover')).path}/c.jpg',
+    )..writeAsBytesSync(jpeg);
+    await plans.setCover(coverPlan.id!, coverShot);
+    expect(plans.byId(coverPlan.id)!.coverPath, isNotNull);
+    await session.sync();
+    expect(await partner.getBytes('$base/plans/${coverPlan.id}/cover'), jpeg);
+    expect(plans.byId(coverPlan.id)!.hasCover, isTrue);
+
+    await partner.putBytes('$base/plans/${coverPlan.id}/cover', otherJpeg);
+    // The other phone's cover replaces ours once ours is no longer pending.
+    await plans.removeCover(coverPlan.id!);
+    await session.sync();
+    await expectLater(
+      partner.getBytes('$base/plans/${coverPlan.id}/cover'),
+      throwsA(isA<ApiException>()),
+    );
+    await partner.putBytes('$base/plans/${coverPlan.id}/cover', otherJpeg);
+    await session.sync();
+    final fetched = plans.byId(coverPlan.id)!;
+    expect(File(fetched.coverPath!).readAsBytesSync(), otherJpeg);
+
     // Signing out leaves nothing behind on the phone.
     await session.logout();
     expect(session.signedIn, isFalse);

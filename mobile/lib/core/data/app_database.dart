@@ -34,7 +34,7 @@ class AppDatabase {
         pathOverride ?? p.join(await getDatabasesPath(), 'finance_tracker.db');
     return openDatabase(
       path,
-      version: 8,
+      version: 9,
       onCreate: (db, _) async {
         await _createTables(db);
         await seedOwner(db);
@@ -68,6 +68,16 @@ class AppDatabase {
           );
           await db.execute(
             'ALTER TABLE transactions ADD COLUMN photo_dirty INTEGER NOT NULL DEFAULT 0',
+          );
+        }
+        if (from >= 4 && from < 9) {
+          // Same trio as receipts, for a plan's cover photo.
+          await db.execute('ALTER TABLE plans ADD COLUMN cover_path TEXT');
+          await db.execute(
+            'ALTER TABLE plans ADD COLUMN has_cover INTEGER NOT NULL DEFAULT 0',
+          );
+          await db.execute(
+            'ALTER TABLE plans ADD COLUMN cover_dirty INTEGER NOT NULL DEFAULT 0',
           );
         }
         if (from >= 4 && from < 7) {
@@ -142,6 +152,9 @@ class AppDatabase {
       created_by TEXT,
       destination TEXT NOT NULL DEFAULT '',
       description TEXT NOT NULL DEFAULT '',
+      cover_path TEXT,
+      has_cover INTEGER NOT NULL DEFAULT 0,
+      cover_dirty INTEGER NOT NULL DEFAULT 0,
       dirty INTEGER NOT NULL DEFAULT 1,
       synced INTEGER NOT NULL DEFAULT 0,
       deleted INTEGER NOT NULL DEFAULT 0

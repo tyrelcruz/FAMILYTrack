@@ -54,6 +54,7 @@ class SyncService {
     );
     await _pull(db, res);
     await _syncPhotoFiles(db, base);
+    await _syncCoverFiles(db, base);
     return SyncResult(serverTime: res['serverTime'] as int, group: group);
   }
 
@@ -210,6 +211,7 @@ class SyncService {
     }
 
     await _pushPhotos(db, base);
+    await _pushCovers(db, base);
 
     // Plan and member deletes go after transactions so none still point
     // at them.
@@ -295,6 +297,97 @@ class SyncService {
         );
       }
     }
+  }
+
+  /// Uploads or removes plan covers for plans the server knows.
+  Future<void> _pushCovers(Database db, String base) async {
+    final rows = await db.query(
+      'plans',
+      where: 'cover_dirty = 1 AND synced = 1 AND deleted = 0',
+    );
+    for (final r in rows) {
+      final id = r['id'] as String;
+      final path = r['cover_path'] as String?;
+      try {
+        if (path != null && File(path).existsSync()) {
+          await _api.putBytes(
+            '$base/plans/$id/cover',
+            await File(path).readAsBytes(),
+          );
+          await db.update(
+            'plans',
+            {'cover_dirty': 0, 'has_cover': 1},
+            where: 'id = ?',
+            whereArgs: [id],
+          );
+        } else {
+          await _api.delete('$base/plans/$id/cover');
+          await db.update(
+            'plans',
+            {'cover_dirty': 0, 'has_cover': 0, 'cover_path': null},
+            where: 'id = ?',
+            whereArgs: [id],
+          );
+        }
+      } on ApiException catch (e) {
+        if (e.isNetwork || e.status == 401 || e.status >= 500) rethrow;
+        // Refused (too big, not an image, plan gone): stop retrying.
+        await db.update(
+          'plans',
+          {'cover_dirty': 0},
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      }
+    }
+  }
+
+  /// Downloads covers other people set, removes ones they deleted, and
+  /// deletes files no plan points at any more.
+  Future<void> _syncCoverFiles(Database db, String base) async {
+    final missing = await db.query(
+      'plans',
+      where:
+          'has_cover = 1 AND cover_path IS NULL AND cover_dirty = 0 '
+          'AND deleted = 0',
+    );
+    for (final r in missing) {
+      final id = r['id'] as String;
+      try {
+        final bytes = await _api.getBytes('$base/plans/$id/cover');
+        final path = await PhotoStore.saveBytes(id, bytes, folder: 'covers');
+        await db.update(
+          'plans',
+          {'cover_path': path},
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      } on ApiException catch (e) {
+        if (e.isNetwork || e.status == 401 || e.status >= 500) rethrow;
+      }
+    }
+    final gone = await db.query(
+      'plans',
+      where: 'has_cover = 0 AND cover_path IS NOT NULL AND cover_dirty = 0',
+    );
+    for (final r in gone) {
+      await PhotoStore.delete(r['cover_path'] as String?);
+      await db.update(
+        'plans',
+        {'cover_path': null},
+        where: 'id = ?',
+        whereArgs: [r['id']],
+      );
+    }
+    final keep = {
+      for (final r in await db.query(
+        'plans',
+        columns: ['cover_path'],
+        where: 'cover_path IS NOT NULL',
+      ))
+        r['cover_path'] as String,
+    };
+    await PhotoStore.prune(keep, folder: 'covers');
   }
 
   /// Downloads photos other people added, removes ones they deleted, and
@@ -417,6 +510,13 @@ class SyncService {
             p['destination'] ?? '',
             p['description'] ?? '',
           ],
+        );
+        // Whether the server has a cover; a local change not yet uploaded wins.
+        await txn.update(
+          'plans',
+          {'has_cover': p['hasCover'] == true ? 1 : 0},
+          where: 'id = ? AND cover_dirty = 0',
+          whereArgs: [p['id']],
         );
       }
 
