@@ -131,7 +131,7 @@ class _Option extends StatelessWidget {
     ),
     title: Text(
       label,
-      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: color),
+      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: color),
     ),
     onTap: onTap,
   );
@@ -234,7 +234,7 @@ class ReceiptField extends StatelessWidget {
   Widget build(BuildContext context) {
     final has = path != null;
     return Material(
-      color: const Color(0xFFF4F4FA),
+      color: AppColors.background,
       borderRadius: BorderRadius.circular(compact ? 18 : 22),
       child: InkWell(
         onTap: () => _tap(context),
@@ -256,7 +256,7 @@ class ReceiptField extends StatelessWidget {
                   child: const Icon(
                     Icons.add_a_photo_outlined,
                     color: AppColors.blue,
-                    size: 21,
+                    size: 18,
                   ),
                 ),
               const SizedBox(width: 14),
@@ -264,7 +264,7 @@ class ReceiptField extends StatelessWidget {
                 child: Text(
                   has ? 'Photo attached' : 'Add a photo',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 13,
                     fontWeight: has ? FontWeight.w600 : FontWeight.w500,
                     color: has
                         ? AppColors.textPrimary
@@ -275,14 +275,14 @@ class ReceiptField extends StatelessWidget {
               if (has)
                 IconButton(
                   tooltip: 'Remove photo',
-                  icon: const Icon(Icons.close_rounded, size: 20),
+                  icon: const Icon(Icons.close_rounded, size: 17),
                   color: AppColors.textMuted,
                   onPressed: () => onChanged(null),
                 )
               else
                 const Text(
                   'Receipt or item',
-                  style: TextStyle(fontSize: 12.5, color: AppColors.textMuted),
+                  style: TextStyle(fontSize: 11, color: AppColors.textMuted),
                 ),
             ],
           ),

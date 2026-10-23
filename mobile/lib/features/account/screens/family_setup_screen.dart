@@ -32,7 +32,7 @@ class FamilySetupScreen extends StatelessWidget {
                       style: const TextStyle(
                         fontFamily: AppTheme.displayFont,
                         fontFamilyFallback: AppTheme.displayFallback,
-                        fontSize: 36,
+                        fontSize: 31,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.2,
                         color: AppColors.textPrimary,
@@ -53,7 +53,7 @@ class FamilySetupScreen extends StatelessWidget {
                 'Your spending lives in a family. Start one, or join the one '
                 'someone invited you to.',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   height: 1.4,
                   color: AppColors.textSecondary,
                 ),

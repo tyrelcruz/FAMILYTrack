@@ -41,6 +41,7 @@ Future<void> showAddActivitySheet(
   context: context,
   isScrollControlled: true,
   useSafeArea: true,
+  constraints: sheetConstraints(context),
   backgroundColor: AppColors.surface,
   barrierColor: AppColors.textPrimary.withValues(alpha: 0.25),
   shape: const RoundedRectangleBorder(
@@ -308,15 +309,8 @@ class _AddActivitySheetState extends State<_AddActivitySheet> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                Text(
+                SheetTitleBar(
                   _trip && _expense ? 'Add Trip Expense' : 'Add Activity',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.4,
-                    color: AppColors.textPrimary,
-                  ),
                 ),
                 const SizedBox(height: 14),
                 if (plan != null && planStats != null)
@@ -372,7 +366,7 @@ class _AddActivitySheetState extends State<_AddActivitySheet> {
                         display: (m) => Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(m.icon, size: 17, color: m.color),
+                            Icon(m.icon, size: 14.5, color: m.color),
                             const SizedBox(width: 6),
                             Flexible(
                               child: Text(
@@ -398,7 +392,7 @@ class _AddActivitySheetState extends State<_AddActivitySheet> {
                       return Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          MemberAvatar(m, size: 20),
+                          MemberAvatar(m, size: 17),
                           const SizedBox(width: 6),
                           Text(m.name),
                         ],
@@ -414,7 +408,7 @@ class _AddActivitySheetState extends State<_AddActivitySheet> {
                   'Amount · balance ${formatAmount(finance.totalBalance)}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 13.5,
+                    fontSize: 11.5,
                     color: AppColors.textMuted,
                   ),
                 ),
@@ -538,7 +532,7 @@ class _CategoryCard extends StatelessWidget {
                     angle: 0.25,
                     child: Icon(
                       category.icon,
-                      size: 86,
+                      size: 74,
                       color: category.color.withValues(alpha: 0.22),
                     ),
                   ),
@@ -572,7 +566,7 @@ class _CategoryCard extends StatelessWidget {
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 14.5),
+                              style: const TextStyle(fontSize: 12.5),
                             ),
                             const SizedBox(height: 4),
                             Row(
@@ -585,7 +579,7 @@ class _CategoryCard extends StatelessWidget {
                                     fontFamily: AppTheme.displayFont,
                                     fontFamilyFallback:
                                         AppTheme.displayFallback,
-                                    fontSize: 25,
+                                    fontSize: 21.5,
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 0.2,
                                     color: AppColors.textPrimary,
@@ -598,7 +592,7 @@ class _CategoryCard extends StatelessWidget {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
-                                      fontSize: 12.5,
+                                      fontSize: 11,
                                       color: AppColors.textMuted,
                                     ),
                                   ),
@@ -612,7 +606,7 @@ class _CategoryCard extends StatelessWidget {
                         const Icon(
                           Icons.keyboard_arrow_down_rounded,
                           color: AppColors.textPrimary,
-                          size: 26,
+                          size: 22.5,
                         ),
                     ],
                   ),
@@ -676,8 +670,8 @@ class _CheckCard extends StatelessWidget {
                         ),
                         child: const Icon(
                           Icons.arrow_forward_rounded,
-                          color: AppColors.forest,
-                          size: 24,
+                          color: Colors.white,
+                          size: 20.5,
                         ),
                       ),
                     ),
@@ -692,7 +686,7 @@ class _CheckCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 15,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
                         ),
@@ -701,7 +695,7 @@ class _CheckCard extends StatelessWidget {
                       Text(
                         message,
                         style: TextStyle(
-                          fontSize: 12.5,
+                          fontSize: 11,
                           height: 1.35,
                           color: warning
                               ? AppColors.expenseRed
@@ -712,7 +706,7 @@ class _CheckCard extends StatelessWidget {
                       Text(
                         footer,
                         style: const TextStyle(
-                          fontSize: 12.5,
+                          fontSize: 11,
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -855,7 +849,7 @@ class _CategoryStripState extends State<_CategoryStrip> {
           children: [
             const Text(
               'Category',
-              style: TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
             ),
             const SizedBox(width: 10),
             AnimatedOpacity(
@@ -872,14 +866,14 @@ class _CategoryStripState extends State<_CategoryStrip> {
                   children: [
                     Icon(
                       Icons.auto_awesome_rounded,
-                      size: 13,
+                      size: 11,
                       color: AppColors.blue,
                     ),
                     SizedBox(width: 4),
                     Text(
                       'Auto-picked',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.w600,
                         color: AppColors.blue,
                       ),
@@ -893,7 +887,7 @@ class _CategoryStripState extends State<_CategoryStrip> {
               onTap: widget.onMore,
               child: const Text(
                 'See all',
-                style: TextStyle(fontSize: 14, color: AppColors.textMuted),
+                style: TextStyle(fontSize: 12, color: AppColors.textMuted),
               ),
             ),
           ],
@@ -936,16 +930,16 @@ class _QuickPicks extends StatelessWidget {
       children: [
         const Row(
           children: [
-            Icon(Icons.history_rounded, size: 16, color: AppColors.textMuted),
+            Icon(Icons.history_rounded, size: 14, color: AppColors.textMuted),
             SizedBox(width: 6),
             Text(
               'Quick add',
-              style: TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
             ),
             Spacer(),
             Text(
               'Tap to fill',
-              style: TextStyle(fontSize: 12.5, color: AppColors.textMuted),
+              style: TextStyle(fontSize: 11, color: AppColors.textMuted),
             ),
           ],
         ),
@@ -996,7 +990,7 @@ class _QuickPickChip extends StatelessWidget {
                   color: cat.tint,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(cat.icon, color: cat.color, size: 16),
+                child: Icon(cat.icon, color: cat.color, size: 14),
               ),
               const SizedBox(width: 8),
               ConstrainedBox(
@@ -1006,7 +1000,7 @@ class _QuickPickChip extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
@@ -1016,7 +1010,7 @@ class _QuickPickChip extends StatelessWidget {
               Text(
                 formatAmount(pick.amount),
                 style: const TextStyle(
-                  fontSize: 13.5,
+                  fontSize: 11.5,
                   color: AppColors.textMuted,
                 ),
               ),

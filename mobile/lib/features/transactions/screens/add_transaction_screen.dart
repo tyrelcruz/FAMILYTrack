@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'package:finance_tracker/core/widgets/breakdown_layout.dart';
 import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/core/utils/formatters.dart';
@@ -181,7 +182,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget build(BuildContext context) {
     final members = context.watch<FamilyProvider>().members;
     const fieldStyle = TextStyle(
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: FontWeight.w600,
       color: AppColors.textPrimary,
     );
@@ -202,259 +203,262 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             ),
           ),
         ),
-        body: SafeArea(
-          bottom: false,
-          child: Form(
-            key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-              children: [
-                Row(
-                  children: [
-                    CircleButton(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: const Icon(
-                        Icons.arrow_back_rounded,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        _editing ? 'Edit Transaction' : 'New Transaction',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontFamily: AppTheme.displayFont,
-                          fontFamilyFallback: AppTheme.displayFallback,
-                          fontSize: 25,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.2,
+        body: PatchBackdrop.behind(
+          SafeArea(
+            bottom: false,
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                children: [
+                  Row(
+                    children: [
+                      CircleButton(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: const Icon(
+                          Icons.arrow_back_rounded,
                           color: AppColors.textPrimary,
                         ),
                       ),
-                    ),
-                    if (_editing)
-                      CircleButton(
-                        onTap: _delete,
-                        child: const Icon(
-                          Icons.delete_outline_rounded,
-                          color: AppColors.red,
-                        ),
-                      )
-                    else
-                      const SizedBox(width: 54),
-                  ],
-                ),
-                const SizedBox(height: 22),
-                _TypeToggle(
-                  value: _type,
-                  onChanged: (t) => setState(() {
-                    _type = t;
-                    _categoryId = _categories.first.id;
-                  }),
-                ),
-                const SizedBox(height: 18),
-                _Section(
-                  child: Column(
-                    children: [
-                      Text(
-                        expense
-                            ? 'How much did you spend?'
-                            : 'How much came in?',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Center(
-                        child: IntrinsicWidth(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(minWidth: 160),
-                            child: TextFormField(
-                              controller: _amount,
-                              autofocus: !_editing,
-                              textAlign: TextAlign.start,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                  RegExp(r'^\d*\.?\d{0,2}'),
-                                ),
-                              ],
-                              style: TextStyle(
-                                fontFamily: AppTheme.displayFont,
-                                fontFamilyFallback: AppTheme.displayFallback,
-                                fontSize: 49,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.2,
-                                color: expense
-                                    ? AppColors.textPrimary
-                                    : AppColors.green,
-                              ),
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                hintText: '₱0.00',
-                                hintStyle: TextStyle(
-                                  color: AppColors.textMuted,
-                                ),
-                                prefixText: '₱',
-                                prefixStyle: TextStyle(
-                                  fontFamily: AppTheme.displayFont,
-                                  fontFamilyFallback: AppTheme.displayFallback,
-                                  fontSize: 49,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textMuted,
-                                ),
-                              ),
-                              validator: (v) {
-                                final n = double.tryParse(v ?? '');
-                                return (n == null || n <= 0)
-                                    ? 'Enter an amount greater than 0'
-                                    : null;
-                              },
-                            ),
+                      Expanded(
+                        child: Text(
+                          _editing ? 'EDIT TRANSACTION' : 'NEW TRANSACTION',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontFamily: AppTheme.displayFont,
+                            fontFamilyFallback: AppTheme.displayFallback,
+                            fontSize: 21.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.2,
+                            color: AppColors.textPrimary,
                           ),
                         ),
                       ),
+                      if (_editing)
+                        CircleButton(
+                          onTap: _delete,
+                          child: const Icon(
+                            Icons.delete_outline_rounded,
+                            color: AppColors.red,
+                          ),
+                        )
+                      else
+                        const SizedBox(width: 54),
                     ],
                   ),
-                ),
-                const SizedBox(height: 18),
-                _Section(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SheetLabel('Title'),
-                      TextFormField(
-                        controller: _title,
-                        textCapitalization: TextCapitalization.sentences,
-                        style: fieldStyle,
-                        decoration: sheetInputDecoration(
-                          hint: expense ? 'e.g. Groceries' : 'e.g. Salary',
+                  const SizedBox(height: 22),
+                  _TypeToggle(
+                    value: _type,
+                    onChanged: (t) => setState(() {
+                      _type = t;
+                      _categoryId = _categories.first.id;
+                    }),
+                  ),
+                  const SizedBox(height: 18),
+                  _Section(
+                    child: Column(
+                      children: [
+                        Text(
+                          expense
+                              ? 'How much did you spend?'
+                              : 'How much came in?',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
-                        validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Enter a title'
-                            : null,
-                      ),
-                      const SizedBox(height: 20),
-                      const SheetLabel('Category'),
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: [
-                          for (final c in _categories)
-                            CategoryChip.of(
-                              c,
-                              selected: c.id == _categoryId,
-                              onTap: () => setState(() => _categoryId = c.id),
+                        const SizedBox(height: 6),
+                        Center(
+                          child: IntrinsicWidth(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(minWidth: 160),
+                              child: TextFormField(
+                                controller: _amount,
+                                autofocus: !_editing,
+                                textAlign: TextAlign.start,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d*\.?\d{0,2}'),
+                                  ),
+                                ],
+                                style: TextStyle(
+                                  fontFamily: AppTheme.displayFont,
+                                  fontFamilyFallback: AppTheme.displayFallback,
+                                  fontSize: 42,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.2,
+                                  color: expense
+                                      ? AppColors.textPrimary
+                                      : AppColors.green,
+                                ),
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: '₱0.00',
+                                  hintStyle: TextStyle(
+                                    color: AppColors.textMuted,
+                                  ),
+                                  prefixText: '₱',
+                                  prefixStyle: TextStyle(
+                                    fontFamily: AppTheme.displayFont,
+                                    fontFamilyFallback:
+                                        AppTheme.displayFallback,
+                                    fontSize: 42,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textMuted,
+                                  ),
+                                ),
+                                validator: (v) {
+                                  final n = double.tryParse(v ?? '');
+                                  return (n == null || n <= 0)
+                                      ? 'Enter an amount greater than 0'
+                                      : null;
+                                },
+                              ),
                             ),
-                        ],
-                      ),
-                    ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 18),
-                _Section(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Only worth asking once the family has more than one person.
-                      if (members.length > 1) ...[
-                        SheetLabel(expense ? 'Paid by' : 'Received by'),
+                  const SizedBox(height: 18),
+                  _Section(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SheetLabel('Title'),
+                        TextFormField(
+                          controller: _title,
+                          textCapitalization: TextCapitalization.sentences,
+                          style: fieldStyle,
+                          decoration: sheetInputDecoration(
+                            hint: expense ? 'e.g. Groceries' : 'e.g. Salary',
+                          ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Enter a title'
+                              : null,
+                        ),
+                        const SizedBox(height: 20),
+                        const SheetLabel('Category'),
                         Wrap(
                           spacing: 10,
                           runSpacing: 10,
                           children: [
-                            for (final m in members)
-                              MemberChip(
-                                member: m,
-                                selected:
-                                    m.id ==
-                                    context
-                                        .read<FamilyProvider>()
-                                        .memberFor(_memberId)
-                                        .id,
-                                onTap: () => setState(() => _memberId = m.id),
+                            for (final c in _categories)
+                              CategoryChip.of(
+                                c,
+                                selected: c.id == _categoryId,
+                                onTap: () => setState(() => _categoryId = c.id),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  _Section(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Only worth asking once the family has more than one person.
+                        if (members.length > 1) ...[
+                          SheetLabel(expense ? 'Paid by' : 'Received by'),
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: [
+                              for (final m in members)
+                                MemberChip(
+                                  member: m,
+                                  selected:
+                                      m.id ==
+                                      context
+                                          .read<FamilyProvider>()
+                                          .memberFor(_memberId)
+                                          .id,
+                                  onTap: () => setState(() => _memberId = m.id),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                        SheetLabel(expense ? 'Paid with' : 'Received in'),
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: [
+                            for (final m in PaymentMethod.values)
+                              CategoryChip(
+                                label: m.label,
+                                icon: m.icon,
+                                color: m.color,
+                                tint: m.tint,
+                                selected: m == _method,
+                                // Tapping the selected one clears it.
+                                onTap: () => setState(
+                                  () => _method = m == _method ? null : m,
+                                ),
                               ),
                           ],
                         ),
                         const SizedBox(height: 20),
-                      ],
-                      SheetLabel(expense ? 'Paid with' : 'Received in'),
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: [
-                          for (final m in PaymentMethod.values)
-                            CategoryChip(
-                              label: m.label,
-                              icon: m.icon,
-                              color: m.color,
-                              tint: m.tint,
-                              selected: m == _method,
-                              // Tapping the selected one clears it.
-                              onTap: () => setState(
-                                () => _method = m == _method ? null : m,
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      const SheetLabel('Date'),
-                      Material(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(18),
-                        child: InkWell(
-                          onTap: _pickDate,
+                        const SheetLabel('Date'),
+                        Material(
+                          color: AppColors.background,
                           borderRadius: BorderRadius.circular(18),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 18,
-                              vertical: 17,
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    formatDay(_date),
-                                    style: fieldStyle,
+                          child: InkWell(
+                            onTap: _pickDate,
+                            borderRadius: BorderRadius.circular(18),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 17,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      formatDay(_date),
+                                      style: fieldStyle,
+                                    ),
                                   ),
-                                ),
-                                const Icon(
-                                  Icons.calendar_today_rounded,
-                                  size: 20,
-                                  color: AppColors.textMuted,
-                                ),
-                              ],
+                                  const Icon(
+                                    Icons.calendar_today_rounded,
+                                    size: 17,
+                                    color: AppColors.textMuted,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      const SheetLabel('Photo'),
-                      ReceiptField(
-                        path: _photoChanged
-                            ? _newPhoto?.path
-                            : widget.existing?.photoPath,
-                        onChanged: (f) => setState(() {
-                          _newPhoto = f;
-                          _photoChanged = true;
-                        }),
-                      ),
-                      const SizedBox(height: 20),
-                      const SheetLabel('Note'),
-                      TextFormField(
-                        controller: _note,
-                        maxLines: 2,
-                        style: fieldStyle,
-                        decoration: sheetInputDecoration(hint: 'Optional'),
-                      ),
-                    ],
+                        const SizedBox(height: 20),
+                        const SheetLabel('Photo'),
+                        ReceiptField(
+                          path: _photoChanged
+                              ? _newPhoto?.path
+                              : widget.existing?.photoPath,
+                          onChanged: (f) => setState(() {
+                            _newPhoto = f;
+                            _photoChanged = true;
+                          }),
+                        ),
+                        const SizedBox(height: 20),
+                        const SheetLabel('Note'),
+                        TextFormField(
+                          controller: _note,
+                          maxLines: 2,
+                          style: fieldStyle,
+                          decoration: sheetInputDecoration(hint: 'Optional'),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -507,14 +511,14 @@ class _TypeToggle extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  size: 18,
+                  size: 15.5,
                   color: selected ? color : AppColors.textMuted,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: selected
                         ? AppColors.textPrimary

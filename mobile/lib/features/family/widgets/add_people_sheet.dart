@@ -97,7 +97,7 @@ class _AddPeopleState extends State<_AddPeople> {
   Widget build(BuildContext context) {
     final code = context.watch<SessionProvider>().group?.inviteCode;
     const fieldStyle = TextStyle(
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: FontWeight.w600,
       color: AppColors.textPrimary,
     );
@@ -142,7 +142,7 @@ class _AddPeopleState extends State<_AddPeople> {
             children: [
               for (final m in _added)
                 Chip(
-                  avatar: MemberAvatar(m, size: 24),
+                  avatar: MemberAvatar(m, size: 20.5),
                   label: Text(m.name),
                   backgroundColor: m.color.withValues(alpha: 0.1),
                   side: BorderSide.none,
@@ -153,7 +153,7 @@ class _AddPeopleState extends State<_AddPeople> {
           const SizedBox(height: 4),
           Text(
             '${_added.length} added — they’re ticked for this plan.',
-            style: const TextStyle(fontSize: 12.5, color: AppColors.textMuted),
+            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
           ),
         ],
         const SizedBox(height: 18),
@@ -189,7 +189,7 @@ class _AddPeopleState extends State<_AddPeople> {
               ? null
               : IconButton(
                   tooltip: 'Copy code',
-                  icon: const Icon(Icons.copy_rounded, size: 20),
+                  icon: const Icon(Icons.copy_rounded, size: 17),
                   color: AppColors.blue,
                   onPressed: () {
                     Clipboard.setData(ClipboardData(text: code));
@@ -245,7 +245,7 @@ class _Option extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(color: tint, shape: BoxShape.circle),
-              child: Icon(icon, color: color, size: 21),
+              child: Icon(icon, color: color, size: 18),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -255,7 +255,7 @@ class _Option extends StatelessWidget {
                   Text(
                     title,
                     style: const TextStyle(
-                      fontSize: 15,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
@@ -264,7 +264,7 @@ class _Option extends StatelessWidget {
                   Text(
                     subtitle,
                     style: const TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 11,
                       color: AppColors.textMuted,
                     ),
                   ),

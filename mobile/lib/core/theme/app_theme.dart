@@ -15,7 +15,7 @@ class AppTheme {
   static ThemeData get light => ThemeData(
     useMaterial3: true,
     fontFamily: fontFamily,
-    scaffoldBackgroundColor: AppColors.background,
+    scaffoldBackgroundColor: Colors.white,
     colorScheme:
         ColorScheme.fromSeed(
           seedColor: AppColors.forest,
@@ -24,13 +24,13 @@ class AppTheme {
           primary: AppColors.forest,
           onPrimary: Colors.white,
           secondary: AppColors.lime,
-          onSecondary: AppColors.forest,
+          onSecondary: Colors.white,
         ),
     // Wise-style defaults: lime pills with dark text.
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         backgroundColor: AppColors.lime,
-        foregroundColor: AppColors.forest,
+        foregroundColor: Colors.white,
         shape: const StadiumBorder(),
         textStyle: const TextStyle(fontWeight: FontWeight.w700),
       ),

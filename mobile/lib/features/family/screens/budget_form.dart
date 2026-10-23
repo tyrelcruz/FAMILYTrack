@@ -85,7 +85,7 @@ class _BudgetFormState extends State<_BudgetForm> {
         padding: EdgeInsets.only(bottom: 16),
         child: Text(
           'Every category already has a budget. Tap one to edit it.',
-          style: TextStyle(fontSize: 15, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
         ),
       );
     }

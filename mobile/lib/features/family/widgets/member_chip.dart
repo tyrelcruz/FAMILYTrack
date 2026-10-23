@@ -36,12 +36,12 @@ class MemberChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            MemberAvatar(member, size: 30),
+            MemberAvatar(member, size: 26),
             const SizedBox(width: 8),
             Text(
               member.name,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                 color: AppColors.textPrimary,
               ),

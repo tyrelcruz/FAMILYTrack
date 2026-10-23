@@ -45,6 +45,7 @@ dependencies:
   flutter_contacts: ^2.6.0
   share_plus: ^13.3.1
   image_picker: ^1.2.4
+  flutter_animate: ^4.5.2
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +75,8 @@ flutter:
     - assets/images/peso_coin.png
     - assets/images/peso_coin_1.png
     - assets/images/peso_coin_5.png
+    # Faded travel stickers behind Home's breakdown.
+    - assets/images/patches/
 
   fonts:
     - family: PlusJakartaSans

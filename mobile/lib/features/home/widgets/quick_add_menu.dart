@@ -3,9 +3,11 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/features/family/screens/budget_form.dart';
+import 'package:finance_tracker/features/home/widgets/floating_nav_bar.dart';
 import 'package:finance_tracker/features/transactions/models/transaction.dart';
 import 'package:finance_tracker/features/transactions/screens/add_activity_sheet.dart';
 import 'package:finance_tracker/features/transfers/screens/transfer_sheet.dart';
@@ -104,16 +106,21 @@ class _QuickAddMenu extends StatelessWidget {
       curve: const Interval(0, 0.7, curve: Curves.easeOutBack),
       reverseCurve: Curves.easeInCubic,
     );
-    // Pills appear bottom row first, left to right, one after another;
-    // closing plays the same stagger backwards.
+    // Pills appear bottom row first, left to right, one after another.
     var order = 0;
-    final starts = <List<double>>[
+    final delays = <List<int>>[
       for (var r = _rows.length - 1; r >= 0; r--)
-        [for (final _ in _rows[r]) 0.10 + 0.07 * order++],
+        [for (final _ in _rows[r]) 60 + 70 * order++],
     ].reversed.toList();
+    // Closing just fades the whole stack out together.
+    final content = CurvedAnimation(
+      parent: animation,
+      curve: const Interval(0, 0.5, curve: Curves.easeOut),
+      reverseCurve: const Interval(0.4, 1, curve: Curves.easeIn),
+    );
     // Same spot as the nav bar's "+" so the X appears to replace it.
     final buttonBottom =
-        math.max(MediaQuery.paddingOf(context).bottom, 8.0) + 3;
+        math.max(MediaQuery.paddingOf(context).bottom, 12.0) + 8;
 
     return Stack(
       children: [
@@ -137,35 +144,37 @@ class _QuickAddMenu extends StatelessWidget {
         Positioned(
           left: 0,
           right: 0,
-          bottom: buttonBottom + 60 + 30,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (var r = 0; r < _rows.length; r++) ...[
-                if (r > 0) const SizedBox(height: 18),
-                // Shrinks a row slightly on narrow phones instead of overflowing.
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        for (var i = 0; i < _rows[r].length; i++) ...[
-                          if (i > 0) const SizedBox(width: 16),
-                          _Pill(
-                            choice: _rows[r][i],
-                            parent: animation,
-                            start: starts[r][i],
-                            onTap: () => onPick(_rows[r][i].action),
-                          ),
+          bottom: buttonBottom + 56 + 26,
+          child: FadeTransition(
+            opacity: content,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (var r = 0; r < _rows.length; r++) ...[
+                  if (r > 0) const SizedBox(height: 18),
+                  // Shrinks a row slightly on narrow phones instead of overflowing.
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (var i = 0; i < _rows[r].length; i++) ...[
+                            if (i > 0) const SizedBox(width: 16),
+                            _Pill(
+                              choice: _rows[r][i],
+                              delay: delays[r][i],
+                              onTap: () => onPick(_rows[r][i].action),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
         Positioned(
@@ -173,26 +182,39 @@ class _QuickAddMenu extends StatelessWidget {
           left: 0,
           right: 0,
           child: Center(
-            child: Container(
-              width: 74,
-              height: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(22),
-                color: AppColors.lime,
-              ),
-              child: Material(
-                type: MaterialType.transparency,
-                child: InkWell(
-                  onTap: () => Navigator.of(context).pop(),
-                  borderRadius: BorderRadius.circular(22),
-                  child: RotationTransition(
-                    // The "+" spins into an "X" as the menu opens.
-                    turns: Tween(begin: -0.125, end: 0.0).animate(button),
-                    child: const Icon(
-                      Icons.close_rounded,
-                      color: AppColors.forest,
-                      size: 30,
-                      weight: 300,
+            child: RotationTransition(
+              // Starts at the nav patch's tilt and straightens out.
+              turns: Tween(begin: -0.025, end: 0.0).animate(button),
+              child: Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: AppColors.lime,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.lime.withValues(alpha: 0.35),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: CustomPaint(
+                  painter: StitchPainter(),
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: InkWell(
+                      onTap: () => Navigator.of(context).pop(),
+                      borderRadius: BorderRadius.circular(18),
+                      child: RotationTransition(
+                        // The "+" turns a quarter-eighth into an "X".
+                        turns: Tween(begin: 0.0, end: 0.125).animate(button),
+                        child: const Icon(
+                          Icons.add_rounded,
+                          color: Colors.white,
+                          size: 30,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -206,86 +228,63 @@ class _QuickAddMenu extends StatelessWidget {
 }
 
 class _Pill extends StatelessWidget {
-  const _Pill({
-    required this.choice,
-    required this.parent,
-    required this.start,
-    required this.onTap,
-  });
+  const _Pill({required this.choice, required this.delay, required this.onTap});
 
   final _Choice choice;
-  final Animation<double> parent;
 
-  /// Where in the menu's animation (0–1) this pill starts appearing.
-  final double start;
+  /// Milliseconds after the menu starts opening before this pill appears.
+  final int delay;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final fade = CurvedAnimation(
-      parent: parent,
-      curve: Interval(start, math.min(start + 0.25, 1), curve: Curves.easeOut),
-    );
-    // A slight overshoot so each pill settles into place.
-    final move = CurvedAnimation(
-      parent: parent,
-      curve: Interval(
-        start,
-        math.min(start + 0.5, 1),
-        curve: Curves.easeOutBack,
-      ),
-    );
-    return AnimatedBuilder(
-      animation: parent,
-      builder: (context, child) => Opacity(
-        opacity: fade.value.clamp(0.0, 1.0),
-        child: Transform.translate(
-          offset: Offset(0, 40 * (1 - move.value)),
-          child: Transform.scale(
-            scale: 0.82 + 0.18 * move.value,
-            alignment: Alignment.bottomCenter,
-            child: child,
-          ),
-        ),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.shadow.withValues(alpha: 0.22),
-              blurRadius: 18,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            onTap: onTap,
+    return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
             borderRadius: BorderRadius.circular(30),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(22, 13, 24, 13),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(choice.icon, size: 23, color: AppColors.textSecondary),
-                  const SizedBox(width: 16),
-                  Text(
-                    choice.label,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadow.withValues(alpha: 0.22),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(30),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(22, 13, 24, 13),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(choice.icon, size: 20, color: AppColors.textSecondary),
+                    const SizedBox(width: 16),
+                    Text(
+                      choice.label,
+                      style: const TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
+        )
+        .animate(delay: delay.ms)
+        .fadeIn(duration: 260.ms, curve: Curves.easeOut)
+        .slideY(begin: 0.7, end: 0, duration: 420.ms, curve: Curves.easeOutBack)
+        .scale(
+          begin: const Offset(0.85, 0.85),
+          end: const Offset(1, 1),
+          alignment: Alignment.bottomCenter,
+          duration: 420.ms,
+          curve: Curves.easeOutBack,
+        );
   }
 }

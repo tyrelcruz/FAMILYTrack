@@ -61,13 +61,13 @@ class CategoryChip extends StatelessWidget {
                 color: selected ? AppColors.surface : tint,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 17),
+              child: Icon(icon, color: color, size: 14.5),
             ),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                 color: AppColors.textPrimary,
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'package:finance_tracker/core/widgets/breakdown_layout.dart';
 import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/core/utils/formatters.dart';
@@ -87,113 +88,115 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         statusBarColor: Colors.transparent,
       ),
       child: Scaffold(
-        body: SafeArea(
-          bottom: false,
-          child: ListView(
-            padding: EdgeInsets.fromLTRB(
-              20,
-              12,
-              20,
-              MediaQuery.paddingOf(context).bottom + 24,
-            ),
-            children: [
-              Row(
-                children: [
-                  CircleButton(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: const Icon(
-                      Icons.arrow_back_rounded,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const Expanded(
-                    child: Text(
-                      'Transactions',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: AppTheme.displayFont,
-                        fontFamilyFallback: AppTheme.displayFallback,
-                        fontSize: 25,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.2,
+        body: PatchBackdrop.behind(
+          SafeArea(
+            bottom: false,
+            child: ListView(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                12,
+                20,
+                MediaQuery.paddingOf(context).bottom + 24,
+              ),
+              children: [
+                Row(
+                  children: [
+                    CircleButton(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: const Icon(
+                        Icons.arrow_back_rounded,
                         color: AppColors.textPrimary,
                       ),
                     ),
-                  ),
-                  CircleButton(
-                    onTap: () => showAddActivitySheet(context),
-                    child: const Icon(
-                      Icons.add_rounded,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              const MonthSelector(),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _TotalCard(
-                      label: 'Income',
-                      amount: p.monthIncome,
-                      icon: Icons.south_west_rounded,
-                      color: AppColors.green,
-                      tint: AppColors.greenTint,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: _TotalCard(
-                      label: 'Expenses',
-                      amount: p.monthExpense,
-                      icon: Icons.north_east_rounded,
-                      color: AppColors.expenseRed,
-                      tint: AppColors.redTint,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              _FilterToggle(
-                value: _filter,
-                onChanged: (v) => setState(() => _filter = v),
-              ),
-              const SizedBox(height: 8),
-              if (items.isEmpty && transfers.isEmpty)
-                const EmptyState('No transactions this month'),
-              for (final day in dayKeys) ...[
-                _DayHeader(day: day, items: days[day]!),
-                for (final t in transfersByDay[day] ?? const <Transfer>[])
-                  TransferRow(
-                    transfer: t,
-                    onTap: () => showTransferSheet(context, existing: t),
-                  ),
-                for (final t in days[day]!)
-                  Dismissible(
-                    key: ValueKey(t.id),
-                    direction: DismissDirection.endToStart,
-                    background: Container(
-                      alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.only(right: 22),
-                      decoration: BoxDecoration(
-                        color: AppColors.redTint,
-                        borderRadius: BorderRadius.circular(18),
+                    const Expanded(
+                      child: Text(
+                        'TRANSACTIONS',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: AppTheme.displayFont,
+                          fontFamilyFallback: AppTheme.displayFallback,
+                          fontSize: 21.5,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.2,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
+                    ),
+                    CircleButton(
+                      onTap: () => showAddActivitySheet(context),
                       child: const Icon(
-                        Icons.delete_outline_rounded,
-                        color: AppColors.red,
+                        Icons.add_rounded,
+                        color: AppColors.textPrimary,
                       ),
                     ),
-                    onDismissed: (_) => _delete(t),
-                    child: ActivityRow(
-                      item: t,
-                      onTap: () => _push(AddTransactionScreen(existing: t)),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                const MonthSelector(),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _TotalCard(
+                        label: 'Income',
+                        amount: p.monthIncome,
+                        icon: Icons.south_west_rounded,
+                        color: AppColors.green,
+                        tint: AppColors.greenTint,
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: _TotalCard(
+                        label: 'Expenses',
+                        amount: p.monthExpense,
+                        icon: Icons.north_east_rounded,
+                        color: AppColors.expenseRed,
+                        tint: AppColors.redTint,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _FilterToggle(
+                  value: _filter,
+                  onChanged: (v) => setState(() => _filter = v),
+                ),
+                const SizedBox(height: 8),
+                if (items.isEmpty && transfers.isEmpty)
+                  const EmptyState('No transactions this month'),
+                for (final day in dayKeys) ...[
+                  _DayHeader(day: day, items: days[day]!),
+                  for (final t in transfersByDay[day] ?? const <Transfer>[])
+                    TransferRow(
+                      transfer: t,
+                      onTap: () => showTransferSheet(context, existing: t),
+                    ),
+                  for (final t in days[day]!)
+                    Dismissible(
+                      key: ValueKey(t.id),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 22),
+                        decoration: BoxDecoration(
+                          color: AppColors.redTint,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: const Icon(
+                          Icons.delete_outline_rounded,
+                          color: AppColors.red,
+                        ),
+                      ),
+                      onDismissed: (_) => _delete(t),
+                      child: ActivityRow(
+                        item: t,
+                        onTap: () => _push(AddTransactionScreen(existing: t)),
+                      ),
+                    ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -235,13 +238,13 @@ class _TotalCard extends StatelessWidget {
               color: tint,
               borderRadius: BorderRadius.circular(11),
             ),
-            child: Icon(icon, color: color, size: 21),
+            child: Icon(icon, color: color, size: 18),
           ),
           const SizedBox(height: 14),
           Text(
             label,
             style: const TextStyle(
-              fontSize: 14.5,
+              fontSize: 12.5,
               color: AppColors.textSecondary,
             ),
           ),
@@ -252,7 +255,7 @@ class _TotalCard extends StatelessWidget {
             child: Text(
               formatAmount(amount),
               style: const TextStyle(
-                fontSize: 20,
+                fontSize: 17,
                 fontWeight: FontWeight.w700,
                 letterSpacing: -0.4,
                 color: AppColors.textPrimary,
@@ -290,7 +293,7 @@ class _FilterToggle extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 14.5,
+                fontSize: 12.5,
                 fontWeight: FontWeight.w600,
                 color: selected ? AppColors.textPrimary : AppColors.textMuted,
               ),
@@ -337,7 +340,7 @@ class _DayHeader extends StatelessWidget {
             child: Text(
               formatDayHeader(day),
               style: const TextStyle(
-                fontSize: 15,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textSecondary,
               ),
@@ -345,7 +348,7 @@ class _DayHeader extends StatelessWidget {
           ),
           Text(
             '${net < 0 ? '-' : '+'}${formatAmount(net.abs())}',
-            style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
+            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
         ],
       ),

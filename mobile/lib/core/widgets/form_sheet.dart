@@ -1,5 +1,6 @@
 import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
+import 'package:finance_tracker/core/widgets/sheet_parts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -12,6 +13,7 @@ Future<void> showFormSheet(
 }) => showModalBottomSheet(
   context: context,
   isScrollControlled: true,
+  constraints: sheetConstraints(context),
   backgroundColor: AppColors.surface,
   barrierColor: AppColors.textPrimary.withValues(alpha: 0.35),
   shape: const RoundedRectangleBorder(
@@ -49,7 +51,7 @@ Future<void> showFormSheet(
                         style: const TextStyle(
                           fontFamily: AppTheme.displayFont,
                           fontFamilyFallback: AppTheme.displayFallback,
-                          fontSize: 27,
+                          fontSize: 23,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.2,
                           color: AppColors.textPrimary,
@@ -59,7 +61,7 @@ Future<void> showFormSheet(
                       Text(
                         subtitle,
                         style: const TextStyle(
-                          fontSize: 15,
+                          fontSize: 13,
                           height: 1.4,
                           color: AppColors.textSecondary,
                         ),
@@ -68,7 +70,7 @@ Future<void> showFormSheet(
                   ),
                 ),
                 const SizedBox(width: 12),
-                _CloseButton(onTap: () => Navigator.of(context).pop()),
+                const SheetCloseButton(),
               ],
             ),
             const SizedBox(height: 24),
@@ -79,33 +81,6 @@ Future<void> showFormSheet(
     ),
   ),
 );
-
-class _CloseButton extends StatelessWidget {
-  const _CloseButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.neutralTint,
-      shape: const CircleBorder(),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: const SizedBox(
-          width: 40,
-          height: 40,
-          child: Icon(
-            Icons.close_rounded,
-            size: 22,
-            color: AppColors.textPrimary,
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// Small caption above a sheet field.
 class SheetLabel extends StatelessWidget {
@@ -119,7 +94,7 @@ class SheetLabel extends StatelessWidget {
     child: Text(
       text,
       style: const TextStyle(
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: FontWeight.w600,
         color: AppColors.textSecondary,
       ),
@@ -176,7 +151,7 @@ class SheetAmountField extends StatelessWidget {
       style: const TextStyle(
         fontFamily: AppTheme.displayFont,
         fontFamilyFallback: AppTheme.displayFallback,
-        fontSize: 34,
+        fontSize: 29,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.2,
         color: AppColors.textPrimary,
@@ -190,7 +165,7 @@ class SheetAmountField extends StatelessWidget {
             style: TextStyle(
               fontFamily: AppTheme.displayFont,
               fontFamilyFallback: AppTheme.displayFallback,
-              fontSize: 34,
+              fontSize: 29,
               fontWeight: FontWeight.w700,
               color: AppColors.textMuted,
             ),
@@ -228,13 +203,13 @@ class SheetPrimaryButton extends StatelessWidget {
         onPressed: busy ? null : onPressed,
         style: FilledButton.styleFrom(
           backgroundColor: AppColors.lime,
-          foregroundColor: AppColors.forest,
+          foregroundColor: Colors.white,
           disabledBackgroundColor: AppColors.lime.withValues(alpha: 0.55),
-          disabledForegroundColor: AppColors.forest,
+          disabledForegroundColor: Colors.white,
           shape: const StadiumBorder(),
           textStyle: const TextStyle(
             fontFamily: 'PlusJakartaSans',
-            fontSize: 17,
+            fontSize: 14.5,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -244,7 +219,7 @@ class SheetPrimaryButton extends StatelessWidget {
                 height: 22,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  color: AppColors.forest,
+                  color: Colors.white,
                 ),
               )
             : Text(label),
@@ -272,7 +247,7 @@ class SheetDangerButton extends StatelessWidget {
       height: 54,
       child: TextButton.icon(
         onPressed: onPressed,
-        icon: Icon(icon, size: 20),
+        icon: Icon(icon, size: 17),
         label: Text(label),
         style: TextButton.styleFrom(
           backgroundColor: AppColors.redTint,
@@ -280,7 +255,7 @@ class SheetDangerButton extends StatelessWidget {
           shape: const StadiumBorder(),
           textStyle: const TextStyle(
             fontFamily: 'PlusJakartaSans',
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
         ),

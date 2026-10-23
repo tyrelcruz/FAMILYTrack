@@ -23,6 +23,7 @@ Future<void> showTransferSheet(
   context: context,
   isScrollControlled: true,
   useSafeArea: true,
+  constraints: sheetConstraints(context),
   backgroundColor: AppColors.surface,
   barrierColor: AppColors.textPrimary.withValues(alpha: 0.25),
   shape: const RoundedRectangleBorder(
@@ -157,7 +158,7 @@ class _TransferSheetState extends State<_TransferSheet> {
     Widget methodLabel(PaymentMethod m) => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(m.icon, size: 17, color: m.color),
+        Icon(m.icon, size: 14.5, color: m.color),
         const SizedBox(width: 6),
         Flexible(child: Text(m.label, overflow: TextOverflow.ellipsis)),
       ],
@@ -167,7 +168,7 @@ class _TransferSheetState extends State<_TransferSheet> {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          MemberAvatar(m, size: 20),
+          MemberAvatar(m, size: 17),
           const SizedBox(width: 6),
           Flexible(child: Text(m.name, overflow: TextOverflow.ellipsis)),
         ],
@@ -196,21 +197,14 @@ class _TransferSheetState extends State<_TransferSheet> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                Text(
+                SheetTitleBar(
                   widget.existing == null ? 'Add Transfer' : 'Edit Transfer',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.4,
-                    color: AppColors.textPrimary,
-                  ),
                 ),
                 const SizedBox(height: 4),
                 const Text(
                   'Moves money around — it isn’t counted as spending.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: AppColors.textMuted),
+                  style: TextStyle(fontSize: 11, color: AppColors.textMuted),
                 ),
                 const SizedBox(height: 14),
                 SegmentedPill<TransferKind>(
@@ -238,7 +232,7 @@ class _TransferSheetState extends State<_TransferSheet> {
                       'Add someone to the family first (Family tab) to move '
                       'money between people.',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         color: AppColors.textSecondary,
                       ),
                     ),
@@ -315,7 +309,7 @@ class _TransferSheetState extends State<_TransferSheet> {
                   _problem ?? 'Amount',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 13.5,
+                    fontSize: 11.5,
                     color: _problem == null
                         ? AppColors.textMuted
                         : AppColors.expenseRed,

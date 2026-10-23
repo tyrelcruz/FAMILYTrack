@@ -31,9 +31,9 @@ class CoinBreakdown extends StatefulWidget {
   final double? limit;
 
   static const _maxCoins = 14;
-  static const _rx = 44.0; // half coin width
-  static const _ry = 12.0; // half coin ellipse height
-  static const _thick = 13.0; // coin thickness
+  static const _rx = 37.0; // half coin width
+  static const _ry = 10.0; // half coin ellipse height
+  static const _thick = 11.0; // coin thickness
 
   /// Tall enough for the highest possible stack, no more.
   static const height = _maxCoins * _thick + _ry * 2 + 10;
@@ -114,7 +114,7 @@ class _CoinBreakdownState extends State<CoinBreakdown> {
             _Label(
               'Limit',
               topOf(planCoins + spentCoins + ghostCoins),
-              AppColors.lime,
+              AppColors.mintBright,
               AppColors.textPrimary,
             ),
           if (spentCoins > 0)
@@ -171,10 +171,10 @@ class _CoinBreakdownState extends State<CoinBreakdown> {
                     'No income or\nspending yet\nthis month',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 11,
                       height: 1.35,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: AppColors.textMuted,
                     ),
                   ),
                 ),
@@ -184,7 +184,7 @@ class _CoinBreakdownState extends State<CoinBreakdown> {
                   top: topOf(inCoins) - 2,
                   child: const _Pill(
                     'Income',
-                    AppColors.lime,
+                    AppColors.mintBright,
                     AppColors.textPrimary,
                   ),
                 ),
@@ -229,7 +229,7 @@ class _Pill extends StatelessWidget {
     ),
     child: Text(
       text,
-      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: fg),
+      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: fg),
     ),
   );
 }
@@ -297,12 +297,12 @@ const _twentyPeso = _Look(
 
 /// See-through coins: the room left under the limit.
 const _ghost = _Look(
-  rim: Color(0x40FFFFFF),
-  edge: Color(0x24FFFFFF),
-  notch: Color(0x33FFFFFF),
-  shade: Color(0x26000000),
-  faceOpacity: 0.16,
-  faceFilter: ColorFilter.mode(Color(0xFFFFFFFF), BlendMode.srcATop),
+  rim: Color(0x66C9D3D0),
+  edge: Color(0x40B7C4C0),
+  notch: Color(0x4D9AAAA5),
+  shade: Color(0x338A9994),
+  faceOpacity: 0.12,
+  faceFilter: ColorFilter.mode(Color(0xFF9AAAA5), BlendMode.srcATop),
 );
 
 class _StacksPainter extends CustomPainter {
@@ -389,7 +389,7 @@ class _StacksPainter extends CustomPainter {
         height: _ry * 2.2,
       ),
       Paint()
-        ..color = const Color(0x55000000)
+        ..color = const Color(0x26000000)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
     );
     for (var i = 0; i < coins.length; i++) {

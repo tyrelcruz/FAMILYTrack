@@ -23,7 +23,7 @@ class MonthSelector extends StatelessWidget {
               formatMonth(p.month),
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 17,
+                fontSize: 14.5,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),
@@ -55,7 +55,7 @@ class _Arrow extends StatelessWidget {
         child: SizedBox(
           width: 40,
           height: 40,
-          child: Icon(icon, color: AppColors.textPrimary, size: 24),
+          child: Icon(icon, color: AppColors.textPrimary, size: 20.5),
         ),
       ),
     );

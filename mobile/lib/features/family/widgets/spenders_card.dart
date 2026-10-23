@@ -85,7 +85,7 @@ class _SpenderRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 14),
         child: Row(
           children: [
-            MemberAvatar(m, size: 46),
+            MemberAvatar(m, size: 39.5),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -104,7 +104,7 @@ class _SpenderRow extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.textPrimary,
                                 ),
@@ -121,7 +121,7 @@ class _SpenderRow extends StatelessWidget {
                       Text(
                         formatAmount(spender.spent),
                         style: const TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
                         ),
@@ -135,7 +135,7 @@ class _SpenderRow extends StatelessWidget {
                         : '$count ${count == 1 ? 'expense' : 'expenses'} · '
                               '${(share * 100).round()}% of the family',
                     style: const TextStyle(
-                      fontSize: 13,
+                      fontSize: 11,
                       color: AppColors.textMuted,
                     ),
                   ),
@@ -155,7 +155,7 @@ class _SpenderRow extends StatelessWidget {
             const SizedBox(width: 6),
             const Icon(
               Icons.chevron_right_rounded,
-              size: 22,
+              size: 19,
               color: AppColors.textMuted,
             ),
           ],
@@ -182,7 +182,7 @@ class _Tag extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 9.5,
           fontWeight: FontWeight.w600,
           color: you ? AppColors.blue : AppColors.textSecondary,
         ),

@@ -91,7 +91,7 @@ class _Option extends StatelessWidget {
               color: tint,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: Icon(icon, color: color, size: 20.5),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -101,7 +101,7 @@ class _Option extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 15.5,
+                    fontSize: 13.5,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
@@ -110,7 +110,7 @@ class _Option extends StatelessWidget {
                 Text(
                   subtitle,
                   style: const TextStyle(
-                    fontSize: 12.5,
+                    fontSize: 11,
                     height: 1.35,
                     color: AppColors.textMuted,
                   ),
@@ -145,7 +145,7 @@ class _PillButton extends StatelessWidget {
           label,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 13.5,
+            fontSize: 11.5,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -181,14 +181,14 @@ class _CodeButton extends StatelessWidget {
             Text(
               code,
               style: const TextStyle(
-                fontSize: 14.5,
+                fontSize: 12.5,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.5,
                 color: AppColors.blue,
               ),
             ),
             const SizedBox(width: 6),
-            const Icon(Icons.copy_rounded, size: 15, color: AppColors.blue),
+            const Icon(Icons.copy_rounded, size: 13, color: AppColors.blue),
           ],
         ),
       ),

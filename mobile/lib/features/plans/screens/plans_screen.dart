@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
+import 'package:finance_tracker/core/widgets/breakdown_layout.dart';
 import 'package:finance_tracker/core/widgets/form_sheet.dart';
 import 'package:finance_tracker/features/account/providers/session_provider.dart';
 import 'package:finance_tracker/features/family/providers/family_provider.dart';
@@ -15,8 +15,8 @@ import 'package:finance_tracker/features/plans/screens/plan_form_screen.dart';
 import 'package:finance_tracker/features/plans/widgets/plan_card.dart';
 import 'package:finance_tracker/features/transactions/providers/finance_provider.dart';
 
-/// Plans tab: the plans you made, the ones others shared, and templates to
-/// start a new one.
+/// Plans tab: the plan happening now up top, the rest and templates in the
+/// card below.
 class PlansScreen extends StatefulWidget {
   const PlansScreen({super.key});
 
@@ -74,158 +74,93 @@ class _PlansScreenState extends State<PlansScreen> {
     final rest = shown.skip(1).toList();
     double spent(Plan p) => PlanStats.of(p, finance.all, family).spent;
 
-    return Stack(
-      children: [
-        // Soft blue wash behind the header, like the home screen.
-        Container(
-          height: 300,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFFE2E1FF), AppColors.background],
-            ),
-          ),
-        ),
-        SafeArea(
-          bottom: false,
-          child: ListView(
-            padding: EdgeInsets.fromLTRB(
-              20,
-              10,
-              20,
-              MediaQuery.paddingOf(context).bottom + 24,
-            ),
+    final activeCount = shown.where((p) => p.isActive(now)).length;
+    return ColoredBox(
+      color: Colors.white,
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          PageHero(
+            patches: PatchBackdrop.plans,
             children: [
-              Row(
-                children: [
-                  const Expanded(
-                    child: Text(
-                      'PLANS',
-                      style: TextStyle(
-                        fontFamily: AppTheme.displayFont,
-                        fontFamilyFallback: AppTheme.displayFallback,
-                        fontSize: 34,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.2,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-                  Material(
-                    color: AppColors.surface,
-                    shape: const CircleBorder(),
-                    elevation: 2,
-                    shadowColor: AppColors.shadow.withValues(alpha: 0.3),
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: () => _push(const PlanFormScreen()),
-                      child: const SizedBox(
-                        width: 46,
-                        height: 46,
-                        child: Icon(
-                          Icons.add_rounded,
-                          color: AppColors.blue,
-                          size: 28,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              PageTitle(
+                'Plans',
+                subtitle: Text(
+                  shown.isEmpty
+                      ? 'Trips, events and monthly budgets'
+                      : '${shown.length} '
+                            '${shown.length == 1 ? 'plan' : 'plans'}'
+                            '${activeCount > 0 ? ' · $activeCount happening now' : ''}',
+                ),
               ),
-              const SizedBox(height: 16),
-              _PlanTabs(
-                shared: _shared,
-                onChanged: (v) => setState(() => _shared = v),
+              const SizedBox(height: 14),
+              MintPill(
+                label: 'New plan',
+                icon: Icons.add_rounded,
+                onTap: () => _push(const PlanFormScreen()),
               ),
               const SizedBox(height: 18),
-              if (featured == null)
-                _EmptyTab(
-                  shared: _shared,
-                  onCreate: () => _push(const PlanFormScreen()),
-                )
-              else
-                FeaturedPlanCard(
-                  plan: featured,
-                  spent: spent(featured),
-                  members: [
-                    for (final m in family.members)
-                      if (featured.shares.containsKey(m.id)) m,
-                  ],
-                  onTap: () => _push(PlanDetailScreen(planId: featured.id!)),
-                ),
-              if (rest.isNotEmpty) ...[
-                _SectionTitle(_shared ? 'Shared With Me' : 'My Plans'),
-                for (final p in rest) ...[
-                  PlanListCard(
-                    plan: p,
-                    spent: spent(p),
-                    onTap: () => _push(PlanDetailScreen(planId: p.id!)),
-                  ),
-                  const SizedBox(height: 14),
-                ],
-              ],
-              _SectionTitle(
-                'Plan Templates',
-                action: 'View all',
-                onAction: _showAllTemplates,
+              MintToggle(
+                labels: const ['My Plans', 'Shared With Me'],
+                index: _shared ? 1 : 0,
+                onChanged: (i) => setState(() => _shared = i == 1),
               ),
-              _TemplateGrid(
-                templates: PlanTemplate.all.take(4).toList(),
-                onPick: (t) => _push(PlanFormScreen(template: t)),
+              const SizedBox(height: 18),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: featured == null
+                    ? _EmptyTab(
+                        shared: _shared,
+                        onCreate: () => _push(const PlanFormScreen()),
+                      )
+                    : FeaturedPlanCard(
+                        plan: featured,
+                        spent: spent(featured),
+                        members: [
+                          for (final m in family.members)
+                            if (featured.shares.containsKey(m.id)) m,
+                        ],
+                        onTap: () =>
+                            _push(PlanDetailScreen(planId: featured.id!)),
+                      ),
               ),
             ],
           ),
-        ),
-      ],
-    );
-  }
-}
-
-/// "My Plans" / "Shared With Me" switch with a blue selected pill.
-class _PlanTabs extends StatelessWidget {
-  const _PlanTabs({required this.shared, required this.onChanged});
-
-  final bool shared;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget tab(String label, bool value) {
-      final selected = shared == value;
-      return Expanded(
-        child: GestureDetector(
-          onTap: () => onChanged(value),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            padding: const EdgeInsets.symmetric(vertical: 13),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(22),
-              color: selected ? AppColors.lime : null,
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: selected ? AppColors.forest : AppColors.textPrimary,
-              ),
+          FloatingCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (rest.isNotEmpty) ...[
+                  CardHeading(
+                    _shared ? 'Shared With Me' : 'More Plans',
+                    trailing: '${rest.length}',
+                  ),
+                  for (final p in rest)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                      child: PlanListCard(
+                        plan: p,
+                        spent: spent(p),
+                        onTap: () => _push(PlanDetailScreen(planId: p.id!)),
+                      ),
+                    ),
+                ],
+                CardHeading(
+                  'Plan Templates',
+                  action: 'View all',
+                  onTap: _showAllTemplates,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _TemplateGrid(
+                    templates: PlanTemplate.all.take(4).toList(),
+                    onPick: (t) => _push(PlanFormScreen(template: t)),
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(26),
-        boxShadow: AppColors.softShadow,
-      ),
-      child: Row(
-        children: [tab('My Plans', false), tab('Shared With Me', true)],
+        ],
       ),
     );
   }
@@ -270,7 +205,7 @@ class _EmptyTab extends StatelessWidget {
     decoration: BoxDecoration(
       color: AppColors.surface,
       borderRadius: BorderRadius.circular(26),
-      boxShadow: AppColors.softShadow,
+      border: Border.all(color: AppColors.divider),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -279,19 +214,19 @@ class _EmptyTab extends StatelessWidget {
           width: 52,
           height: 52,
           decoration: const BoxDecoration(
-            color: AppColors.blueTint,
+            color: AppColors.mint,
             shape: BoxShape.circle,
           ),
           child: Icon(
             shared ? Icons.group_outlined : Icons.luggage_outlined,
-            color: AppColors.blue,
+            color: AppColors.tealDark,
           ),
         ),
         const SizedBox(height: 14),
         Text(
           shared ? 'Nothing shared yet' : 'No plans yet',
           style: const TextStyle(
-            fontSize: 19,
+            fontSize: 16.5,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
@@ -303,7 +238,7 @@ class _EmptyTab extends StatelessWidget {
               : 'Plan a trip or a month: set the budget, where the money is, '
                     'and who’s in. Or start from a template below.',
           style: const TextStyle(
-            fontSize: 14,
+            fontSize: 12,
             height: 1.45,
             color: AppColors.textSecondary,
           ),
@@ -312,48 +247,6 @@ class _EmptyTab extends StatelessWidget {
           const SizedBox(height: 18),
           SheetPrimaryButton(label: 'Create a Plan', onPressed: onCreate),
         ],
-      ],
-    ),
-  );
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.title, {this.action, this.onAction});
-
-  final String title;
-  final String? action;
-  final VoidCallback? onAction;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(2, 26, 2, 12),
-    child: Row(
-      children: [
-        Expanded(
-          child: Text(
-            title.toUpperCase(),
-            style: const TextStyle(
-              fontFamily: AppTheme.displayFont,
-              fontFamilyFallback: AppTheme.displayFallback,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.4,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ),
-        if (action != null)
-          GestureDetector(
-            onTap: onAction,
-            child: Text(
-              action!,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.blue,
-              ),
-            ),
-          ),
       ],
     ),
   );

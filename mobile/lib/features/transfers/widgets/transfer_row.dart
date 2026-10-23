@@ -44,7 +44,7 @@ class TransferRow extends StatelessWidget {
               child: Icon(
                 people ? Icons.people_alt_outlined : Icons.swap_horiz_rounded,
                 color: AppColors.textSecondary,
-                size: 26,
+                size: 22.5,
               ),
             ),
             const SizedBox(width: 16),
@@ -57,7 +57,7 @@ class TransferRow extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 17,
+                      fontSize: 14.5,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
@@ -68,7 +68,7 @@ class TransferRow extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 14.5,
+                      fontSize: 12.5,
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -79,7 +79,7 @@ class TransferRow extends StatelessWidget {
             Text(
               formatAmount(t.amount),
               style: const TextStyle(
-                fontSize: 17,
+                fontSize: 14.5,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textSecondary,
               ),

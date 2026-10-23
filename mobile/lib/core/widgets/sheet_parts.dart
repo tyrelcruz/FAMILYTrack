@@ -6,9 +6,69 @@ import 'package:flutter/services.dart';
 // Building blocks shared by the quick-entry bottom sheets (Add Activity,
 // Add Transfer).
 
+/// Sheets stop short of the top so there is always room to tap out.
+BoxConstraints sheetConstraints(BuildContext context) =>
+    BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.86);
+
+/// Centered sheet title with a round close button on the right.
+class SheetTitleBar extends StatelessWidget {
+  const SheetTitleBar(this.title, {super.key});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    alignment: Alignment.center,
+    children: [
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 44),
+        child: Text(
+          title,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 16.5,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.4,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ),
+      const Align(alignment: Alignment.centerRight, child: SheetCloseButton()),
+    ],
+  );
+}
+
+/// Round grey "×" that closes the sheet it sits in.
+class SheetCloseButton extends StatelessWidget {
+  const SheetCloseButton({super.key});
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: 'Close',
+    button: true,
+    child: Material(
+      color: AppColors.neutralTint,
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => Navigator.of(context).maybePop(),
+        child: const SizedBox(
+          width: 34,
+          height: 34,
+          child: Icon(
+            Icons.close_rounded,
+            size: 18,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 /// Light grey rounded box used for every row on the sheet.
 BoxDecoration get sheetBoxDecoration => BoxDecoration(
-  color: const Color(0xFFF4F4FA),
+  color: AppColors.background,
   borderRadius: BorderRadius.circular(22),
 );
 
@@ -32,7 +92,7 @@ class SheetSelect<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const valueStyle = TextStyle(
-      fontSize: 15,
+      fontSize: 13,
       fontWeight: FontWeight.w600,
       color: AppColors.textPrimary,
     );
@@ -63,7 +123,7 @@ class SheetSelect<T> extends StatelessWidget {
                   Text(
                     label,
                     style: const TextStyle(
-                      fontSize: 12,
+                      fontSize: 10.5,
                       color: AppColors.textMuted,
                     ),
                   ),
@@ -78,7 +138,7 @@ class SheetSelect<T> extends StatelessWidget {
             const Icon(
               Icons.keyboard_arrow_down_rounded,
               color: AppColors.textPrimary,
-              size: 22,
+              size: 19,
             ),
           ],
         ),
@@ -98,7 +158,7 @@ class SheetBigAmount extends StatelessWidget {
     const style = TextStyle(
       fontFamily: AppTheme.displayFont,
       fontFamilyFallback: AppTheme.displayFallback,
-      fontSize: 45,
+      fontSize: 38.5,
       fontWeight: FontWeight.w700,
       letterSpacing: 0.2,
       color: AppColors.textPrimary,
@@ -119,7 +179,7 @@ class SheetBigAmount extends StatelessWidget {
               border: InputBorder.none,
               isDense: true,
               hintText: '0',
-              hintStyle: style.copyWith(color: const Color(0xFFC9C9DA)),
+              hintStyle: style.copyWith(color: const Color(0xFFC5D0CC)),
               // A prefix icon stays visible before anything is typed.
               prefixIcon: Padding(
                 padding: const EdgeInsets.only(right: 8),
@@ -153,7 +213,11 @@ class SheetNoteField extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.edit_outlined, color: AppColors.textMuted, size: 19),
+          const Icon(
+            Icons.edit_outlined,
+            color: AppColors.textMuted,
+            size: 16.5,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: TextField(
@@ -163,7 +227,7 @@ class SheetNoteField extends StatelessWidget {
               minLines: 1,
               maxLines: 3,
               style: const TextStyle(
-                fontSize: 15,
+                fontSize: 13,
                 color: AppColors.textPrimary,
               ),
               decoration: InputDecoration(
@@ -174,7 +238,7 @@ class SheetNoteField extends StatelessWidget {
                 // A wrapped hint would keep the box two lines tall.
                 hintMaxLines: 1,
                 hintStyle: const TextStyle(
-                  fontSize: 15,
+                  fontSize: 13,
                   color: AppColors.textMuted,
                 ),
               ),
@@ -227,14 +291,14 @@ class GradientActionButton extends StatelessWidget {
                       height: 22,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        color: AppColors.forest,
+                        color: Colors.white,
                       ),
                     )
                   : Text(
                       label,
                       style: const TextStyle(
-                        color: AppColors.forest,
-                        fontSize: 16.5,
+                        color: Colors.white,
+                        fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
                     ),

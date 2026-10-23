@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'package:finance_tracker/core/widgets/breakdown_layout.dart';
 import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/core/utils/formatters.dart';
@@ -62,68 +63,70 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         statusBarColor: Colors.transparent,
       ),
       child: Scaffold(
-        body: SafeArea(
-          bottom: false,
-          child: RefreshIndicator(
-            onRefresh: session.sync,
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(
-                20,
-                12,
-                20,
-                MediaQuery.paddingOf(context).bottom + 24,
-              ),
-              children: [
-                Row(
-                  children: [
-                    CircleButton(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: const Icon(
-                        Icons.arrow_back_rounded,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const Expanded(
-                      child: Text(
-                        'Notifications',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: AppTheme.displayFont,
-                          fontFamilyFallback: AppTheme.displayFallback,
-                          fontSize: 25,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.2,
+        body: PatchBackdrop.behind(
+          SafeArea(
+            bottom: false,
+            child: RefreshIndicator(
+              onRefresh: session.sync,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  12,
+                  20,
+                  MediaQuery.paddingOf(context).bottom + 24,
+                ),
+                children: [
+                  Row(
+                    children: [
+                      CircleButton(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: const Icon(
+                          Icons.arrow_back_rounded,
                           color: AppColors.textPrimary,
                         ),
                       ),
+                      const Expanded(
+                        child: Text(
+                          'NOTIFICATIONS',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: AppTheme.displayFont,
+                            fontFamilyFallback: AppTheme.displayFallback,
+                            fontSize: 21.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.2,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 54),
+                    ],
+                  ),
+                  if (warnings.isNotEmpty) ...[
+                    const _SectionTitle('Heads up'),
+                    for (final w in warnings) ...[
+                      _WarningCard(warning: w),
+                      const SizedBox(height: 10),
+                    ],
+                  ],
+                  if (activity.items.isEmpty) ...[
+                    const SizedBox(height: 40),
+                    const EmptyState(
+                      'Nothing yet. When someone in the family adds an expense, '
+                      'joins, or makes a plan, it shows up here.',
                     ),
-                    const SizedBox(width: 54),
                   ],
-                ),
-                if (warnings.isNotEmpty) ...[
-                  const _SectionTitle('Heads up'),
-                  for (final w in warnings) ...[
-                    _WarningCard(warning: w),
-                    const SizedBox(height: 10),
+                  for (final day in days.entries) ...[
+                    _SectionTitle(day.key),
+                    _FeedCard(
+                      items: day.value,
+                      myUserId: myUserId,
+                      onOpen: _openTarget,
+                    ),
                   ],
                 ],
-                if (activity.items.isEmpty) ...[
-                  const SizedBox(height: 40),
-                  const EmptyState(
-                    'Nothing yet. When someone in the family adds an expense, '
-                    'joins, or makes a plan, it shows up here.',
-                  ),
-                ],
-                for (final day in days.entries) ...[
-                  _SectionTitle(day.key),
-                  _FeedCard(
-                    items: day.value,
-                    myUserId: myUserId,
-                    onOpen: _openTarget,
-                  ),
-                ],
-              ],
+              ),
             ),
           ),
         ),
@@ -238,7 +241,7 @@ class _WarningCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         child: Row(
           children: [
-            Icon(warning.icon, color: warning.color, size: 24),
+            Icon(warning.icon, color: warning.color, size: 20.5),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -247,7 +250,7 @@ class _WarningCard extends StatelessWidget {
                   Text(
                     warning.title,
                     style: const TextStyle(
-                      fontSize: 15,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
@@ -256,7 +259,7 @@ class _WarningCard extends StatelessWidget {
                   Text(
                     warning.body,
                     style: const TextStyle(
-                      fontSize: 13,
+                      fontSize: 11,
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -388,7 +391,7 @@ class _FeedRow extends StatelessWidget {
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
-                  fontSize: 15,
+                  fontSize: 13,
                 ),
               ),
             ),
@@ -402,7 +405,7 @@ class _FeedRow extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 14.5,
+                      fontSize: 12.5,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
                     ),
@@ -411,7 +414,7 @@ class _FeedRow extends StatelessWidget {
                   Text(
                     [?detail, formatTime(a.createdAt)].join(' · '),
                     style: const TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 11,
                       color: AppColors.textMuted,
                     ),
                   ),
@@ -423,7 +426,7 @@ class _FeedRow extends StatelessWidget {
               Text(
                 amount,
                 style: TextStyle(
-                  fontSize: 14.5,
+                  fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                   color: amountColor,
                 ),
@@ -449,7 +452,7 @@ class _SectionTitle extends StatelessWidget {
       style: const TextStyle(
         fontFamily: AppTheme.displayFont,
         fontFamilyFallback: AppTheme.displayFallback,
-        fontSize: 22,
+        fontSize: 19,
         fontWeight: FontWeight.w800,
         letterSpacing: 0.4,
         color: AppColors.textPrimary,

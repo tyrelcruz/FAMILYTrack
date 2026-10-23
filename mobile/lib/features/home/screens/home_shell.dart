@@ -30,10 +30,8 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
-    // Home sits on dark green, so its status bar icons are white.
-    final overlay = _index == 0
-        ? SystemUiOverlayStyle.light
-        : SystemUiOverlayStyle.dark;
+    // Every tab is light, so the status bar icons are dark.
+    const overlay = SystemUiOverlayStyle.dark;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlay.copyWith(statusBarColor: Colors.transparent),
       child: Scaffold(

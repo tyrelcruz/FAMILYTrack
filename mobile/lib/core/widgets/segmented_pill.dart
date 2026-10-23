@@ -55,7 +55,7 @@ class SegmentedPill<T> extends StatelessWidget {
                       if (o.icon != null) ...[
                         Icon(
                           o.icon,
-                          size: 18,
+                          size: 15.5,
                           color: o.value == value
                               ? (o.color ?? AppColors.textPrimary)
                               : AppColors.textMuted,
@@ -65,7 +65,7 @@ class SegmentedPill<T> extends StatelessWidget {
                       Text(
                         o.label,
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: o.value == value
                               ? AppColors.textPrimary

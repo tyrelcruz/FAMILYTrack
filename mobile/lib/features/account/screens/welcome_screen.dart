@@ -13,7 +13,7 @@ import 'package:finance_tracker/features/account/providers/session_provider.dart
 import 'package:finance_tracker/features/account/screens/account_screen.dart';
 
 const _blue = AppColors.forest;
-const _fieldBorder = Color(0xFFE2E2EE);
+const _fieldBorder = AppColors.divider;
 
 /// First screen when signed out: log in, or switch to creating an account.
 class WelcomeScreen extends StatefulWidget {
@@ -100,7 +100,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         statusBarColor: Colors.transparent,
       ),
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: Colors.white,
         body: Stack(
           children: [
             const Positioned.fill(child: _SoftBackground()),
@@ -129,7 +129,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       fontFamily: AppTheme.displayFont,
                       fontFamilyFallback: AppTheme.displayFallback,
                       color: Colors.white,
-                      fontSize: 40,
+                      fontSize: 34.5,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.2,
                     ),
@@ -141,7 +141,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   style: const TextStyle(
                     fontFamily: AppTheme.displayFont,
                     fontFamilyFallback: AppTheme.displayFallback,
-                    fontSize: 34,
+                    fontSize: 29,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.2,
                     color: AppColors.textPrimary,
@@ -153,7 +153,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       ? 'Start tracking money with your family.'
                       : 'Your money, together.',
                   style: const TextStyle(
-                    fontSize: 16.5,
+                    fontSize: 14,
                     color: AppColors.textSecondary,
                   ),
                 ),
@@ -188,7 +188,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
                       color: AppColors.textSecondary,
-                      size: 22,
+                      size: 19,
                     ),
                   ),
                 ),
@@ -211,7 +211,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     _error!,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                      fontSize: 14,
+                      fontSize: 12,
                       color: AppColors.expenseRed,
                     ),
                   ),
@@ -234,7 +234,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           ? 'Already have an account?'
                           : 'New to familytrack?',
                       style: const TextStyle(
-                        fontSize: 14.5,
+                        fontSize: 12.5,
                         color: AppColors.textSecondary,
                       ),
                     ),
@@ -244,7 +244,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       child: Text(
                         _register ? 'Log in' : 'Create account',
                         style: const TextStyle(
-                          fontSize: 14.5,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -261,17 +261,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           style: TextButton.styleFrom(
                             foregroundColor: AppColors.textMuted,
                           ),
-                          icon: const Icon(Icons.dns_outlined, size: 16),
+                          icon: const Icon(Icons.dns_outlined, size: 14),
                           label: Text(
                             context.watch<SessionProvider>().serverUrl,
-                            style: const TextStyle(fontSize: 12.5),
+                            style: const TextStyle(fontSize: 11),
                           ),
                         ),
                       ),
                     ),
                     Icon(
                       Icons.groups_2_outlined,
-                      size: 44,
+                      size: 38,
                       color: _blue.withValues(alpha: 0.35),
                     ),
                   ],
@@ -320,7 +320,7 @@ class _Field extends StatelessWidget {
           : TextInputAction.done,
       onSubmitted: onSubmitted == null ? null : (_) => onSubmitted!(),
       style: const TextStyle(
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: FontWeight.w500,
         color: AppColors.textPrimary,
       ),
@@ -331,7 +331,7 @@ class _Field extends StatelessWidget {
         hintStyle: const TextStyle(color: AppColors.textMuted),
         prefixIcon: Padding(
           padding: const EdgeInsets.only(left: 16, right: 10),
-          child: Icon(icon, color: _blue, size: 24),
+          child: Icon(icon, color: _blue, size: 20.5),
         ),
         prefixIconConstraints: const BoxConstraints(),
         suffixIcon: trailing,
@@ -363,17 +363,17 @@ class _SoftBackground extends StatelessWidget {
       Positioned(
         top: -120,
         right: -100,
-        child: _blob(320, const Color(0xFFE6E5FF)),
+        child: _blob(320, const Color(0xFFE2F5EC)),
       ),
       Positioned(
         bottom: -140,
         left: -120,
-        child: _blob(340, const Color(0xFFEEEDFF)),
+        child: _blob(340, const Color(0xFFEAF8F1)),
       ),
       Positioned(
         bottom: -60,
         right: -80,
-        child: _blob(220, const Color(0xFFE1E0FF)),
+        child: _blob(220, const Color(0xFFDCF3E8)),
       ),
     ],
   );
@@ -409,7 +409,7 @@ class _WalletPainter extends CustomPainter {
         ..shader = const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF5653E3), AppColors.forest],
+          colors: [Color(0xFF2CC796), AppColors.tealDark],
         ).createShader(body.outerRect),
     );
     // Flap with a clasp.
@@ -417,7 +417,7 @@ class _WalletPainter extends CustomPainter {
       Rect.fromLTWH(w * 0.6, h * 0.52, w * 0.34, h * 0.22),
       Radius.circular(h * 0.08),
     );
-    canvas.drawRRect(flap, Paint()..color = AppColors.lime);
+    canvas.drawRRect(flap, Paint()..color = AppColors.mintBright);
     canvas.drawCircle(
       Offset(w * 0.7, h * 0.63),
       h * 0.035,

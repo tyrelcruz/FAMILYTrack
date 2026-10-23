@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'package:finance_tracker/core/widgets/breakdown_layout.dart';
 import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/core/utils/formatters.dart';
@@ -37,14 +38,14 @@ class MemberDetailScreen extends StatelessWidget {
         title: Text(
           'Remove $name?',
           style: const TextStyle(
-            fontSize: 21,
+            fontSize: 18,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
         ),
         content: const Text(
           'Their transactions stay and move to the group owner.',
-          style: TextStyle(fontSize: 15, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
@@ -103,83 +104,87 @@ class MemberDetailScreen extends StatelessWidget {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () => showAddActivitySheet(context, memberId: member.id),
-          backgroundColor: AppColors.textPrimary,
+          backgroundColor: AppColors.lime,
           foregroundColor: Colors.white,
-          elevation: 4,
+          elevation: 0,
+          highlightElevation: 0,
           shape: const StadiumBorder(),
           icon: const Icon(Icons.add_rounded),
           label: const Text(
             'Add Expense',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
-        body: SafeArea(
-          bottom: false,
-          child: ListView(
-            padding: EdgeInsets.fromLTRB(
-              24,
-              12,
-              24,
-              MediaQuery.paddingOf(context).bottom + 110,
-            ),
-            children: [
-              Row(
-                children: [
-                  CircleButton(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: const Icon(
-                      Icons.arrow_back_rounded,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const Spacer(),
-                  if (canEdit)
+        body: PatchBackdrop.behind(
+          SafeArea(
+            bottom: false,
+            child: ListView(
+              padding: EdgeInsets.fromLTRB(
+                24,
+                12,
+                24,
+                MediaQuery.paddingOf(context).bottom + 110,
+              ),
+              children: [
+                Row(
+                  children: [
                     CircleButton(
-                      onTap: () => showMemberForm(context, existing: member),
+                      onTap: () => Navigator.of(context).pop(),
                       child: const Icon(
-                        Icons.edit_outlined,
+                        Icons.arrow_back_rounded,
                         color: AppColors.textPrimary,
                       ),
                     ),
-                  if (canDelete) ...[
-                    const SizedBox(width: 12),
-                    CircleButton(
-                      onTap: () => _confirmDelete(context, member.name),
-                      child: const Icon(
-                        Icons.delete_outline_rounded,
-                        color: AppColors.red,
+                    const Spacer(),
+                    if (canEdit)
+                      CircleButton(
+                        onTap: () => showMemberForm(context, existing: member),
+                        child: const Icon(
+                          Icons.edit_outlined,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                    ),
+                    if (canDelete) ...[
+                      const SizedBox(width: 12),
+                      CircleButton(
+                        onTap: () => _confirmDelete(context, member.name),
+                        child: const Icon(
+                          Icons.delete_outline_rounded,
+                          color: AppColors.red,
+                        ),
+                      ),
+                    ],
                   ],
-                ],
-              ),
-              const SizedBox(height: 24),
-              _MemberSummaryCard(
-                member: member,
-                month: finance.month,
-                spent: spent,
-                income: sum(false),
-                count: items.length,
-                share: familySpent == 0 ? 0 : spent / familySpent * 100,
-              ),
-              const SizedBox(height: 12),
-              const MonthSelector(),
-              const SizedBox(height: 12),
-              SectionCard(
-                title: 'Transactions',
-                onAdd: () => showAddActivitySheet(context, memberId: member.id),
-                children: [
-                  if (items.isEmpty)
-                    const EmptyState('No transactions this month'),
-                  for (final t in items)
-                    TransactionRow(
-                      item: t,
-                      onTap: () =>
-                          _push(context, AddTransactionScreen(existing: t)),
-                    ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(height: 24),
+                _MemberSummaryCard(
+                  member: member,
+                  month: finance.month,
+                  spent: spent,
+                  income: sum(false),
+                  count: items.length,
+                  share: familySpent == 0 ? 0 : spent / familySpent * 100,
+                ),
+                const SizedBox(height: 12),
+                const MonthSelector(),
+                const SizedBox(height: 12),
+                SectionCard(
+                  title: 'Transactions',
+                  onAdd: () =>
+                      showAddActivitySheet(context, memberId: member.id),
+                  children: [
+                    if (items.isEmpty)
+                      const EmptyState('No transactions this month'),
+                    for (final t in items)
+                      TransactionRow(
+                        item: t,
+                        onTap: () =>
+                            _push(context, AddTransactionScreen(existing: t)),
+                      ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -232,7 +237,7 @@ class _MemberSummaryCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              MemberAvatar(member, size: 56, ring: true),
+              MemberAvatar(member, size: 48, ring: true),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -246,7 +251,7 @@ class _MemberSummaryCard extends StatelessWidget {
                         fontFamily: AppTheme.displayFont,
                         fontFamilyFallback: AppTheme.displayFallback,
                         color: Colors.white,
-                        fontSize: 25,
+                        fontSize: 21.5,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.2,
                       ),
@@ -254,7 +259,7 @@ class _MemberSummaryCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       member.isOwner ? 'Group owner' : 'Family member',
-                      style: const TextStyle(color: _white70, fontSize: 14),
+                      style: const TextStyle(color: _white70, fontSize: 12),
                     ),
                   ],
                 ),
@@ -266,7 +271,7 @@ class _MemberSummaryCard extends StatelessWidget {
             'Spent in ${formatMonth(month)}',
             style: const TextStyle(
               color: _white70,
-              fontSize: 15,
+              fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -280,7 +285,7 @@ class _MemberSummaryCard extends StatelessWidget {
                 fontFamily: AppTheme.displayFont,
                 fontFamilyFallback: AppTheme.displayFallback,
                 color: Colors.white,
-                fontSize: 45,
+                fontSize: 38.5,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.2,
                 height: 1.15,
@@ -333,7 +338,7 @@ class _Stat extends StatelessWidget {
               value,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -343,7 +348,7 @@ class _Stat extends StatelessWidget {
             label,
             style: const TextStyle(
               color: _MemberSummaryCard._white70,
-              fontSize: 12.5,
+              fontSize: 11,
             ),
           ),
         ],

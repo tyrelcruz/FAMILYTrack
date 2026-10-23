@@ -38,7 +38,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Flutter: 71a624a5bc0c04062bf19101d501e466baf2fb47
   flutter_contacts: 2ec1d6b62ca2869c3bbb3871bd74d4e3ef157135
-  image_picker_ios: c06ac6fe6dc36476da54dbe860dbf2a1ef20fe1e
+  image_picker_ios: e0ece4aa2a75771a7de3fa735d26d90817041326
   share_plus: eccd7beb7cea61271aeed1800e8ccb2b952c0c7f
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0

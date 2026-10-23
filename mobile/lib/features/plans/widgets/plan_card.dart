@@ -77,7 +77,7 @@ class FeaturedPlanCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(26),
-        boxShadow: AppColors.softShadow,
+        border: Border.all(color: AppColors.divider),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(26),
@@ -117,7 +117,7 @@ class FeaturedPlanCard extends StatelessWidget {
                                 fontFamily: AppTheme.displayFont,
                                 fontFamilyFallback: AppTheme.displayFallback,
                                 color: Colors.white,
-                                fontSize: 27,
+                                fontSize: 23,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.2,
                                 shadows: [
@@ -133,7 +133,7 @@ class FeaturedPlanCard extends StatelessWidget {
                               formatDateRange(plan.start, plan.end),
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 15,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w500,
                                 shadows: [
                                   Shadow(
@@ -146,14 +146,14 @@ class FeaturedPlanCard extends StatelessWidget {
                             const Spacer(),
                             Row(
                               children: [
-                                AvatarStack(members: members, size: 32),
+                                AvatarStack(members: members, size: 27.5),
                                 const SizedBox(width: 10),
                                 Text(
                                   '${members.length} '
                                   '${members.length == 1 ? 'member' : 'members'}',
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 14,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -178,7 +178,7 @@ class FeaturedPlanCard extends StatelessWidget {
                             style: TextStyle(
                               fontFamily: AppTheme.displayFont,
                               fontFamilyFallback: AppTheme.displayFallback,
-                              fontSize: 29,
+                              fontSize: 25,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.2,
                               color: over
@@ -189,7 +189,7 @@ class FeaturedPlanCard extends StatelessWidget {
                           Text(
                             ' / ${formatAmount(total)}',
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 14,
                               color: AppColors.textMuted,
                             ),
                           ),
@@ -197,7 +197,7 @@ class FeaturedPlanCard extends StatelessWidget {
                           Text(
                             _percent(spent, total),
                             style: const TextStyle(
-                              fontSize: 14.5,
+                              fontSize: 12.5,
                               color: AppColors.textSecondary,
                             ),
                           ),
@@ -240,7 +240,7 @@ class PlanListCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(22),
-        boxShadow: AppColors.softShadow,
+        border: Border.all(color: AppColors.divider),
       ),
       child: Material(
         type: MaterialType.transparency,
@@ -272,7 +272,7 @@ class PlanListCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
                         ),
@@ -283,7 +283,7 @@ class PlanListCard extends StatelessWidget {
                             ? '${formatDateRange(plan.start, plan.end)} · Ended'
                             : formatDateRange(plan.start, plan.end),
                         style: const TextStyle(
-                          fontSize: 13,
+                          fontSize: 11,
                           color: AppColors.textMuted,
                         ),
                       ),
@@ -308,7 +308,7 @@ class PlanListCard extends StatelessWidget {
                             ),
                           ],
                         ),
-                        style: const TextStyle(fontSize: 15),
+                        style: const TextStyle(fontSize: 13),
                       ),
                       const SizedBox(height: 6),
                       Row(
@@ -324,7 +324,7 @@ class PlanListCard extends StatelessWidget {
                           Text(
                             _percent(spent, total),
                             style: const TextStyle(
-                              fontSize: 12.5,
+                              fontSize: 11,
                               color: AppColors.textMuted,
                             ),
                           ),
@@ -396,7 +396,7 @@ class PlanTemplateTile extends StatelessWidget {
     decoration: BoxDecoration(
       color: AppColors.surface,
       borderRadius: BorderRadius.circular(20),
-      boxShadow: AppColors.softShadow,
+      border: Border.all(color: AppColors.divider),
     ),
     child: Material(
       type: MaterialType.transparency,
@@ -414,7 +414,7 @@ class PlanTemplateTile extends StatelessWidget {
                   color: AppColors.blueTint,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(template.icon, color: AppColors.blue, size: 21),
+                child: Icon(template.icon, color: AppColors.blue, size: 18),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -425,7 +425,7 @@ class PlanTemplateTile extends StatelessWidget {
                       template.title,
                       maxLines: 2,
                       style: const TextStyle(
-                        fontSize: 13.5,
+                        fontSize: 11.5,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
                       ),
@@ -436,7 +436,7 @@ class PlanTemplateTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 10.5,
                         color: AppColors.textMuted,
                       ),
                     ),

@@ -28,7 +28,7 @@ class TransactionRow extends StatelessWidget {
                 color: cat.tint,
                 shape: BoxShape.circle,
               ),
-              child: Icon(cat.icon, color: cat.color, size: 26),
+              child: Icon(cat.icon, color: cat.color, size: 22.5),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -40,7 +40,7 @@ class TransactionRow extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
@@ -54,7 +54,7 @@ class TransactionRow extends StatelessWidget {
                       formatTimeAndDate(item.date),
                       maxLines: 1,
                       style: const TextStyle(
-                        fontSize: 12.5,
+                        fontSize: 11,
                         color: AppColors.textMuted,
                       ),
                     ),
@@ -66,7 +66,7 @@ class TransactionRow extends StatelessWidget {
             Text(
               '${item.isExpense ? '' : '+'}${formatMoney(item.amount)}',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: item.isExpense ? AppColors.textPrimary : AppColors.green,
               ),
@@ -74,7 +74,7 @@ class TransactionRow extends StatelessWidget {
             const SizedBox(width: 6),
             const Icon(
               Icons.chevron_right_rounded,
-              size: 22,
+              size: 19,
               color: AppColors.textMuted,
             ),
           ],

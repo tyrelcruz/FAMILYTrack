@@ -7,10 +7,11 @@ import 'package:finance_tracker/core/api/api_client.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/features/account/models/session.dart';
 import 'package:finance_tracker/features/account/providers/session_provider.dart';
+import 'package:finance_tracker/core/widgets/breakdown_layout.dart';
 import 'package:finance_tracker/core/widgets/form_sheet.dart';
 import 'package:finance_tracker/features/transactions/providers/finance_provider.dart';
 
-/// Profile tab: account, family link and sync status.
+/// Profile tab: who you are up top; your family and app settings below.
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
@@ -18,56 +19,145 @@ class AccountScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final session = context.watch<SessionProvider>();
     if (!session.ready) return const Center(child: CircularProgressIndicator());
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
     final s = session.session;
     final group = session.group;
 
-    return SafeArea(
-      bottom: false,
+    final name = s?.name ?? '';
+    return ColoredBox(
+      color: Colors.white,
       child: ListView(
-        padding: EdgeInsets.fromLTRB(24, 12, 24, bottomInset + 24),
+        padding: EdgeInsets.zero,
         children: [
-          const Text(
-            'PROFILE',
-            style: TextStyle(
-              fontFamily: AppTheme.displayFont,
-              fontFamilyFallback: AppTheme.displayFallback,
-              fontSize: 38,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.2,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            s == null
-                ? 'Sign in to sync spending with your family.'
-                : group == null
-                ? 'Create a family or join one with a code.'
-                : 'Everyone in ${group.name} sees the same data.',
-            style: const TextStyle(
-              fontSize: 17,
-              height: 1.4,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 24),
-          if (s != null) ...[
-            if (group != null) ...[
-              _GroupCard(group: group),
-              const SizedBox(height: 22),
-            ],
-            _UserCard(session: s),
-            const SizedBox(height: 22),
-            if (group == null) ...[
-              if (session.syncError != null) ...[
-                Notice(session.syncError!),
-                const SizedBox(height: 22),
+          PageHero(
+            patches: PatchBackdrop.profile,
+            children: [
+              Center(
+                child: Container(
+                  width: 92,
+                  height: 92,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppColors.mint,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 4),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.teal.withValues(alpha: 0.2),
+                        blurRadius: 18,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    name.isEmpty ? '?' : name[0].toUpperCase(),
+                    style: const TextStyle(
+                      fontFamily: AppTheme.displayFont,
+                      fontFamilyFallback: AppTheme.displayFallback,
+                      fontSize: 38,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.tealDark,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              PageTitle(
+                name.isEmpty ? 'Profile' : name,
+                subtitle: Text(s?.email ?? 'Not signed in'),
+              ),
+              if (group != null) ...[
+                const SizedBox(height: 12),
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(10, 6, 12, 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.mint,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.groups_rounded,
+                          size: 14.5,
+                          color: AppColors.tealDark,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${group.name} · ${session.syncStatus}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.tealDark,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
-              const FamilySetupCard(),
-            ] else
-              _GroupActions(group: group),
-          ],
+              if (s != null) ...[
+                const SizedBox(height: 10),
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () async {
+                      final ok = await _confirm(
+                        context,
+                        title: 'Sign out?',
+                        message:
+                            'This phone goes back to a fresh offline tracker. '
+                            'Your family’s data stays on the server.',
+                        action: 'Sign Out',
+                        danger: true,
+                      );
+                      if (ok) await session.logout();
+                    },
+                    style: TextButton.styleFrom(foregroundColor: AppColors.red),
+                    icon: const Icon(Icons.logout_rounded, size: 15.5),
+                    label: const Text(
+                      'Sign out',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          FloatingCard(
+            padding: const EdgeInsets.fromLTRB(0, 4, 0, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                CardHeading(
+                  group == null ? 'Set up your family' : 'Your family',
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (group != null) ...[
+                        _GroupCard(group: group),
+                        const SizedBox(height: 14),
+                        _GroupActions(group: group),
+                      ] else ...[
+                        if (session.syncError != null) ...[
+                          Notice(session.syncError!),
+                          const SizedBox(height: 16),
+                        ],
+                        const FamilySetupCard(),
+                      ],
+                    ],
+                  ),
+                ),
+                const CardHeading('App'),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: ServerCard(),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -106,14 +196,14 @@ Future<bool> _confirm(
       title: Text(
         title,
         style: const TextStyle(
-          fontSize: 21,
+          fontSize: 18,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
       ),
       content: Text(
         message,
-        style: const TextStyle(fontSize: 15, color: AppColors.textSecondary),
+        style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
       ),
       actions: [
         TextButton(
@@ -146,7 +236,7 @@ class _Card extends StatelessWidget {
     decoration: BoxDecoration(
       color: AppColors.surface,
       borderRadius: BorderRadius.circular(26),
-      boxShadow: AppColors.softShadow,
+      border: Border.all(color: AppColors.divider),
     ),
     child: child,
   );
@@ -167,7 +257,7 @@ class _CardTitle extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            fontSize: 21,
+            fontSize: 18,
             fontWeight: FontWeight.w700,
             letterSpacing: -0.3,
             color: AppColors.textPrimary,
@@ -178,7 +268,7 @@ class _CardTitle extends StatelessWidget {
           Text(
             subtitle!,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 12,
               height: 1.4,
               color: AppColors.textSecondary,
             ),
@@ -208,7 +298,7 @@ class Notice extends StatelessWidget {
         Expanded(
           child: Text(
             message,
-            style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+            style: const TextStyle(fontSize: 12, color: AppColors.textPrimary),
           ),
         ),
       ],
@@ -282,7 +372,7 @@ class ServerCard extends StatelessWidget {
                   const Text(
                     'Server',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
@@ -293,7 +383,7 @@ class ServerCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 11,
                       color: AppColors.textMuted,
                     ),
                   ),
@@ -302,7 +392,7 @@ class ServerCard extends StatelessWidget {
             ),
             const Icon(
               Icons.chevron_right_rounded,
-              size: 22,
+              size: 19,
               color: AppColors.textMuted,
             ),
           ],
@@ -313,90 +403,6 @@ class ServerCard extends StatelessWidget {
 }
 
 // ── Signed in ──────────────────────────────────────────────────────────
-
-class _UserCard extends StatelessWidget {
-  const _UserCard({required this.session});
-
-  final Session session;
-
-  @override
-  Widget build(BuildContext context) {
-    return _Card(
-      child: Row(
-        children: [
-          Container(
-            width: 54,
-            height: 54,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.lime, AppColors.lime],
-              ),
-            ),
-            child: Text(
-              session.name.isEmpty ? '?' : session.name[0].toUpperCase(),
-              style: const TextStyle(
-                fontFamily: AppTheme.displayFont,
-                fontFamilyFallback: AppTheme.displayFallback,
-                fontSize: 25,
-                fontWeight: FontWeight.w700,
-                color: AppColors.forest,
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  session.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  session.email,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    color: AppColors.textMuted,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            tooltip: 'Sign out',
-            icon: const Icon(Icons.logout_rounded, color: AppColors.red),
-            onPressed: () async {
-              final session = context.read<SessionProvider>();
-              final ok = await _confirm(
-                context,
-                title: 'Sign out?',
-                message:
-                    'This phone goes back to a fresh offline tracker. Your '
-                    'family’s data stays on the server.',
-                action: 'Sign Out',
-                danger: true,
-              );
-              if (ok) await session.logout();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class FamilySetupCard extends StatefulWidget {
   const FamilySetupCard({super.key});
@@ -454,7 +460,7 @@ class _FamilySetupCardState extends State<FamilySetupCard> {
   @override
   Widget build(BuildContext context) {
     const fieldStyle = TextStyle(
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: FontWeight.w600,
       color: AppColors.textPrimary,
     );
@@ -490,7 +496,7 @@ class _FamilySetupCardState extends State<FamilySetupCard> {
                       'Bring the $localCount '
                       '${localCount == 1 ? 'entry' : 'entries'} on this phone',
                       style: const TextStyle(
-                        fontSize: 14.5,
+                        fontSize: 12.5,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
                       ),
@@ -498,7 +504,7 @@ class _FamilySetupCardState extends State<FamilySetupCard> {
                     subtitle: const Text(
                       'Turn off to start the family fresh.',
                       style: TextStyle(
-                        fontSize: 12.5,
+                        fontSize: 11,
                         color: AppColors.textMuted,
                       ),
                     ),
@@ -582,7 +588,7 @@ class _GroupCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.groups_rounded, color: Colors.white, size: 30),
+              const Icon(Icons.groups_rounded, color: Colors.white, size: 26),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -593,7 +599,7 @@ class _GroupCard extends StatelessWidget {
                     fontFamily: AppTheme.displayFont,
                     fontFamilyFallback: AppTheme.displayFallback,
                     color: Colors.white,
-                    fontSize: 25,
+                    fontSize: 21.5,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.2,
                   ),
@@ -602,7 +608,7 @@ class _GroupCard extends StatelessWidget {
               Text(
                 '${group.memberCount} '
                 '${group.memberCount == 1 ? 'member' : 'members'}',
-                style: const TextStyle(color: _white70, fontSize: 14),
+                style: const TextStyle(color: _white70, fontSize: 12),
               ),
             ],
           ),
@@ -611,7 +617,7 @@ class _GroupCard extends StatelessWidget {
             'Invite code',
             style: TextStyle(
               color: _white70,
-              fontSize: 15,
+              fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -628,7 +634,7 @@ class _GroupCard extends StatelessWidget {
                       fontFamily: AppTheme.displayFont,
                       fontFamilyFallback: AppTheme.displayFallback,
                       color: Colors.white,
-                      fontSize: 43,
+                      fontSize: 37,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.2,
                     ),
@@ -663,14 +669,14 @@ class _GroupCard extends StatelessWidget {
                       ? Icons.cloud_off_rounded
                       : Icons.cloud_done_rounded,
                   color: Colors.white,
-                  size: 20,
+                  size: 17,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     session.syncStatus,
                     maxLines: 2,
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ),
                 TextButton(
@@ -720,14 +726,14 @@ class _Pill extends StatelessWidget {
                   color: AppColors.textPrimary,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: Colors.white, size: 15),
+                child: Icon(icon, color: Colors.white, size: 13),
               ),
               const SizedBox(width: 10),
               Text(
                 label,
                 style: const TextStyle(
                   color: AppColors.textPrimary,
-                  fontSize: 15,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
               ),

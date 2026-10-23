@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
-import 'package:finance_tracker/core/widgets/circle_button.dart';
+import 'package:finance_tracker/core/utils/formatters.dart';
+import 'package:finance_tracker/core/widgets/breakdown_layout.dart';
 import 'package:finance_tracker/core/widgets/form_sheet.dart';
 import 'package:finance_tracker/features/account/providers/session_provider.dart';
 import 'package:finance_tracker/features/family/models/budget.dart';
@@ -13,7 +14,7 @@ import 'package:finance_tracker/features/family/screens/budget_form.dart';
 import 'package:finance_tracker/features/family/screens/member_detail_screen.dart';
 import 'package:finance_tracker/features/family/screens/member_form.dart';
 import 'package:finance_tracker/features/family/widgets/add_people_card.dart';
-import 'package:finance_tracker/features/family/widgets/family_hero_card.dart';
+import 'package:finance_tracker/features/family/widgets/avatar_stack.dart';
 import 'package:finance_tracker/features/family/widgets/spenders_card.dart';
 import 'package:finance_tracker/features/transactions/providers/finance_provider.dart';
 
@@ -33,8 +34,6 @@ class FamilyScreen extends StatelessWidget {
     if (finance.loading || family.loading) {
       return const Center(child: CircularProgressIndicator());
     }
-    // Includes the floating nav bar height, since the shell uses extendBody.
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
     final group = session.group;
     final myUserId = session.session?.userId;
     final overall = family.overallBudget;
@@ -72,83 +71,173 @@ class FamilyScreen extends StatelessWidget {
       onAddWithoutAccount: () => showMemberForm(context),
     );
 
-    return SafeArea(
-      bottom: false,
+    final spent = finance.monthExpense;
+    final limit = overall?.limit;
+    final over = limit != null && spent > limit;
+
+    return ColoredBox(
+      color: Colors.white,
       child: RefreshIndicator(
         onRefresh: session.sync,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(20, 12, 20, bottomInset + 24),
+          padding: EdgeInsets.zero,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            PageHero(
+              patches: PatchBackdrop.family,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'FAMILY',
-                        style: TextStyle(
-                          fontFamily: AppTheme.displayFont,
-                          fontFamilyFallback: AppTheme.displayFallback,
-                          fontSize: 38,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.2,
-                          color: AppColors.textPrimary,
+                PageTitle(
+                  'Family',
+                  subtitle: Center(child: _StatusLine(session: session)),
+                ),
+                const SizedBox(height: 20),
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        Text(
+                          DateFormat('MMMM y').format(finance.month),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.teal,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        HeroAmount(
+                          formatAmount(spent),
+                          color: over
+                              ? AppColors.expenseRed
+                              : AppColors.textPrimary,
+                        ),
+                        const SizedBox(height: 4),
+                        GestureDetector(
+                          onTap: () => showBudgetForm(
+                            context,
+                            existing: overall,
+                            categoryId: Budget.overall,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                limit == null
+                                    ? 'spent · '
+                                    : over
+                                    ? '${formatAmount(spent - limit)} over '
+                                    : 'spent of ',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              Text(
+                                limit == null
+                                    ? 'set a limit'
+                                    : formatAmount(limit),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.blue,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              const Icon(
+                                Icons.edit_outlined,
+                                size: 14.5,
+                                color: AppColors.forest,
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (limit != null) ...[
+                          const SizedBox(height: 12),
+                          TealBar(
+                            value: limit == 0 ? 1 : spent / limit,
+                            width: 170,
+                            over: over,
+                          ),
+                        ],
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AvatarStack(members: family.members, size: 26),
+                            const SizedBox(width: 10),
+                            Text(
+                              '${family.members.length} '
+                              '${family.members.length == 1 ? 'member' : 'members'}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Positioned(
+                      left: 12,
+                      top: 0,
+                      bottom: 0,
+                      child: Center(
+                        child: MintSideArrow(
+                          left: true,
+                          onTap: () => finance.changeMonth(-1),
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      _StatusLine(session: session),
-                    ],
-                  ),
+                    ),
+                    Positioned(
+                      right: 12,
+                      top: 0,
+                      bottom: 0,
+                      child: Center(
+                        child: MintSideArrow(
+                          left: false,
+                          onTap: () => finance.changeMonth(1),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                CircleButton(
+                const SizedBox(height: 18),
+                MintPill(
+                  label: 'Add someone',
+                  icon: Icons.person_add_alt_rounded,
                   onTap: () => showFormSheet(
                     context,
                     title: 'Add someone',
                     subtitle: 'Choose how they’ll be part of the family.',
                     child: addPeople(),
                   ),
-                  child: const Icon(
-                    Icons.person_add_alt_rounded,
-                    color: AppColors.textPrimary,
-                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 22),
-            FamilyHeroCard(
-              month: finance.month,
-              spent: finance.monthExpense,
-              budget: overall?.limit,
-              members: family.members,
-              onPrevMonth: () => finance.changeMonth(-1),
-              onNextMonth: () => finance.changeMonth(1),
-              onEditBudget: () => showBudgetForm(
-                context,
-                existing: overall,
-                categoryId: Budget.overall,
+            FloatingCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  CardHeading(
+                    'Who’s spending',
+                    trailing:
+                        '${spenders.length} '
+                        '${spenders.length == 1 ? 'person' : 'people'}',
+                  ),
+                  SpendersCard(
+                    spenders: spenders,
+                    total: spent,
+                    onTap: (m) => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => MemberDetailScreen(memberId: m.id!),
+                      ),
+                    ),
+                  ),
+                  const CardHeading('Add someone'),
+                  addPeople(),
+                ],
               ),
             ),
-            _SectionTitle(
-              'Who’s spending',
-              trailing:
-                  '${spenders.length} '
-                  '${spenders.length == 1 ? 'person' : 'people'}',
-            ),
-            SpendersCard(
-              spenders: spenders,
-              total: finance.monthExpense,
-              onTap: (m) => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => MemberDetailScreen(memberId: m.id!),
-                ),
-              ),
-            ),
-            const _SectionTitle('Add someone'),
-            addPeople(),
           ],
         ),
       ),
@@ -184,8 +273,9 @@ class _StatusLine extends StatelessWidget {
     return GestureDetector(
       onTap: group == null || session.syncing ? null : session.sync,
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 17, color: color),
+          Icon(icon, size: 14.5, color: color),
           const SizedBox(width: 6),
           Flexible(
             child: Text(
@@ -193,7 +283,7 @@ class _StatusLine extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 14.5,
+                fontSize: 12.5,
                 color: AppColors.textSecondary,
               ),
             ),
@@ -202,38 +292,4 @@ class _StatusLine extends StatelessWidget {
       ),
     );
   }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.title, {this.trailing});
-
-  final String title;
-  final String? trailing;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(2, 28, 2, 12),
-    child: Row(
-      children: [
-        Expanded(
-          child: Text(
-            title.toUpperCase(),
-            style: const TextStyle(
-              fontFamily: AppTheme.displayFont,
-              fontFamilyFallback: AppTheme.displayFallback,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.4,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ),
-        if (trailing != null)
-          Text(
-            trailing!,
-            style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
-          ),
-      ],
-    ),
-  );
 }

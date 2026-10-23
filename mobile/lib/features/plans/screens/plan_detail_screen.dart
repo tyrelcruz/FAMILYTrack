@@ -35,9 +35,9 @@ import 'package:finance_tracker/features/transfers/widgets/transfer_row.dart';
 enum _Tab { transactions, members, details }
 
 const _navy = AppColors.textPrimary;
-const _sheetTop = Color(0xFFE9E8FF);
-const _sheetBottom = AppColors.background;
-const _paleBlue = Color(0xFFE3E2FF);
+const _sheetTop = Colors.white;
+const _sheetBottom = Colors.white;
+const _paleBlue = AppColors.mint;
 const _iconBlue = AppColors.forest;
 
 /// Trip or monthly plan overview: scene header, budget, quick actions, then
@@ -154,13 +154,13 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
         child: Icon(
           icon,
           color: color == AppColors.textPrimary ? AppColors.blue : color,
-          size: 21,
+          size: 18,
         ),
       ),
       title: Text(
         label,
         style: TextStyle(
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: FontWeight.w600,
           color: color,
         ),
@@ -355,7 +355,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           const EmptyState('No expenses yet — tap Add Expense'),
         for (var i = 0; i < shown.length; i++) ...[
           if (i > 0)
-            const Divider(height: 1, indent: 70, color: Color(0xFFDCDCEA)),
+            const Divider(height: 1, indent: 70, color: AppColors.divider),
           switch (shown[i].$2) {
             final TransactionItem e => _ExpenseLine(
               item: e,
@@ -413,7 +413,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                   '${formatAmount(plan.total - assigned)} of the budget '
                   'isn’t assigned to anyone.',
                   style: const TextStyle(
-                    fontSize: 13.5,
+                    fontSize: 11.5,
                     color: AppColors.textMuted,
                   ),
                 ),
@@ -440,13 +440,13 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: AppColors.textMuted),
+          Icon(icon, size: 17, color: AppColors.textMuted),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               label,
               style: const TextStyle(
-                fontSize: 14.5,
+                fontSize: 12.5,
                 color: AppColors.textSecondary,
               ),
             ),
@@ -454,7 +454,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           Text(
             value,
             style: const TextStyle(
-              fontSize: 14.5,
+              fontSize: 12.5,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),
@@ -531,7 +531,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                 child: Text(
                   plan.description,
                   style: const TextStyle(
-                    fontSize: 14.5,
+                    fontSize: 12.5,
                     height: 1.5,
                     color: AppColors.textSecondary,
                   ),
@@ -605,7 +605,7 @@ class _SceneHeader extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 17,
+                        fontSize: 14.5,
                         fontWeight: FontWeight.w600,
                         shadows: _shadow,
                       ),
@@ -628,7 +628,7 @@ class _SceneHeader extends StatelessWidget {
                         fontFamily: AppTheme.displayFont,
                         fontFamilyFallback: AppTheme.displayFallback,
                         color: Colors.white,
-                        fontSize: 34,
+                        fontSize: 29,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.2,
                         shadows: _shadow,
@@ -642,7 +642,7 @@ class _SceneHeader extends StatelessWidget {
                             const Icon(
                               Icons.place_rounded,
                               color: Colors.white,
-                              size: 16,
+                              size: 14,
                               shadows: _shadow,
                             ),
                             const SizedBox(width: 4),
@@ -653,7 +653,7 @@ class _SceneHeader extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 14.5,
+                                  fontSize: 12.5,
                                   fontWeight: FontWeight.w600,
                                   shadows: _shadow,
                                 ),
@@ -669,7 +669,7 @@ class _SceneHeader extends StatelessWidget {
                       '${members.length == 1 ? 'member' : 'members'}',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 15.5,
+                        fontSize: 13.5,
                         fontWeight: FontWeight.w500,
                         shadows: _shadow,
                       ),
@@ -677,14 +677,14 @@ class _SceneHeader extends StatelessWidget {
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        AvatarStack(members: members, size: 32),
+                        AvatarStack(members: members, size: 27.5),
                         const SizedBox(width: 10),
                         Text(
                           '${members.length} '
                           '${members.length == 1 ? 'member' : 'members'}',
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 14.5,
+                            fontSize: 12.5,
                             fontWeight: FontWeight.w600,
                             shadows: _shadow,
                           ),
@@ -718,7 +718,7 @@ class _GlassButton extends StatelessWidget {
       child: SizedBox(
         width: 42,
         height: 42,
-        child: Icon(icon, color: Colors.white, size: 20),
+        child: Icon(icon, color: Colors.white, size: 17),
       ),
     ),
   );
@@ -761,7 +761,7 @@ class _BudgetCard extends StatelessWidget {
               PlanKind.custom => 'Budget',
             },
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 12,
               color: AppColors.textSecondary,
             ),
           ),
@@ -775,7 +775,7 @@ class _BudgetCard extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: AppTheme.displayFont,
                   fontFamilyFallback: AppTheme.displayFallback,
-                  fontSize: 34,
+                  fontSize: 29,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.2,
                   color: over ? AppColors.expenseRed : _navy,
@@ -784,7 +784,7 @@ class _BudgetCard extends StatelessWidget {
               Text(
                 ' / ${formatAmount(total)}',
                 style: const TextStyle(
-                  fontSize: 17,
+                  fontSize: 14.5,
                   color: AppColors.textMuted,
                 ),
               ),
@@ -798,7 +798,7 @@ class _BudgetCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(5),
                   child: Container(
                     height: 10,
-                    color: const Color(0xFFE6E6F2),
+                    color: AppColors.progressTrack,
                     alignment: Alignment.centerLeft,
                     child: FractionallySizedBox(
                       widthFactor: math.min(ratio, 1),
@@ -824,7 +824,7 @@ class _BudgetCard extends StatelessWidget {
               Text(
                 '${(ratio * 100).round()}%',
                 style: const TextStyle(
-                  fontSize: 13.5,
+                  fontSize: 11.5,
                   color: AppColors.textSecondary,
                 ),
               ),
@@ -861,14 +861,14 @@ class _ActionButton extends StatelessWidget {
               color: _paleBlue,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: AppColors.blue, size: 26),
+            child: Icon(icon, color: AppColors.blue, size: 22.5),
           ),
           const SizedBox(height: 8),
           Text(
             label,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 13,
+              fontSize: 11,
               height: 1.25,
               fontWeight: FontWeight.w500,
               color: _navy,
@@ -899,15 +899,15 @@ class _Tabs extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(22),
-              color: selected ? AppColors.lime : null,
+              color: selected ? AppColors.mint : null,
             ),
             alignment: Alignment.center,
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 14.5,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                color: selected ? AppColors.forest : _navy,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: selected ? AppColors.tealDark : AppColors.textSecondary,
               ),
             ),
           ),
@@ -918,9 +918,9 @@ class _Tabs extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFFE3E2F6),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.7)),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Row(
         children: [
@@ -962,7 +962,7 @@ class _ExpenseLine extends StatelessWidget {
                 color: _paleBlue,
                 shape: BoxShape.circle,
               ),
-              child: Icon(cat.icon, color: _iconBlue, size: 24),
+              child: Icon(cat.icon, color: _iconBlue, size: 20.5),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -977,7 +977,7 @@ class _ExpenseLine extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 15.5,
+                            fontSize: 13.5,
                             fontWeight: FontWeight.w600,
                             color: _navy,
                           ),
@@ -987,7 +987,7 @@ class _ExpenseLine extends StatelessWidget {
                         const SizedBox(width: 6),
                         const Icon(
                           Icons.photo_camera_outlined,
-                          size: 15,
+                          size: 13,
                           color: AppColors.textMuted,
                         ),
                       ],
@@ -999,7 +999,7 @@ class _ExpenseLine extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 13,
+                      fontSize: 11,
                       color: AppColors.textMuted,
                     ),
                   ),
@@ -1010,7 +1010,7 @@ class _ExpenseLine extends StatelessWidget {
             Text(
               '- ${formatAmount(item.amount)}',
               style: const TextStyle(
-                fontSize: 15.5,
+                fontSize: 13.5,
                 fontWeight: FontWeight.w600,
                 color: AppColors.expenseRed,
               ),
@@ -1043,7 +1043,7 @@ class _SectionTitle extends StatelessWidget {
             style: const TextStyle(
               fontFamily: AppTheme.displayFont,
               fontFamilyFallback: AppTheme.displayFallback,
-              fontSize: 22,
+              fontSize: 19,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.4,
               color: AppColors.textPrimary,
@@ -1053,7 +1053,7 @@ class _SectionTitle extends StatelessWidget {
         if (trailing != null)
           Text(
             trailing!,
-            style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
+            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
         if (action != null) ...[
           const SizedBox(width: 10),
@@ -1062,7 +1062,7 @@ class _SectionTitle extends StatelessWidget {
             child: Text(
               action!,
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: AppColors.blue,
               ),
@@ -1129,14 +1129,14 @@ class _WalletTile extends StatelessWidget {
                   color: method.tint,
                   borderRadius: BorderRadius.circular(11),
                 ),
-                child: Icon(method.icon, color: method.color, size: 18),
+                child: Icon(method.icon, color: method.color, size: 15.5),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   method.label,
                   style: const TextStyle(
-                    fontSize: 15,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
@@ -1151,7 +1151,7 @@ class _WalletTile extends StatelessWidget {
             child: Text(
               over ? '-${formatAmount(-left)}' : formatAmount(left),
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 17,
                 fontWeight: FontWeight.w700,
                 letterSpacing: -0.4,
                 color: over ? AppColors.expenseRed : AppColors.textPrimary,
@@ -1165,7 +1165,7 @@ class _WalletTile extends StatelessWidget {
                 : 'of ${formatAmount(allocated)} · ${formatAmount(spent)} spent',
             maxLines: 2,
             style: TextStyle(
-              fontSize: 12.5,
+              fontSize: 11,
               color: allocated == 0
                   ? AppColors.expenseRed
                   : AppColors.textMuted,
@@ -1208,7 +1208,7 @@ class _PersonRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          MemberAvatar(member, size: 36),
+          MemberAvatar(member, size: 31),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -1222,7 +1222,7 @@ class _PersonRow extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 15,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
                         ),
@@ -1243,7 +1243,7 @@ class _PersonRow extends StatelessWidget {
                           TextSpan(
                             text: over ? ' over' : ' left',
                             style: TextStyle(
-                              fontSize: 12.5,
+                              fontSize: 11,
                               color: over
                                   ? AppColors.expenseRed
                                   : AppColors.textMuted,
@@ -1251,7 +1251,7 @@ class _PersonRow extends StatelessWidget {
                           ),
                         ],
                       ),
-                      style: const TextStyle(fontSize: 15),
+                      style: const TextStyle(fontSize: 13),
                     ),
                   ],
                 ),
@@ -1281,7 +1281,7 @@ class _PersonRow extends StatelessWidget {
                         child: Text(
                           '${formatAmount(spent)} / ${formatAmount(share)}',
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 10.5,
                             color: AppColors.textMuted,
                           ),
                         ),
@@ -1312,14 +1312,18 @@ class _Sheet extends StatelessWidget {
     padding: EdgeInsets.only(top: top),
     child: Container(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [_sheetTop, _sheetBottom],
-          stops: [0, 0.4],
-        ),
+      decoration: BoxDecoration(
+        color: _sheetTop,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+        // Same thin edge and soft shadow as the cards on the main tabs.
+        border: const Border(top: BorderSide(color: AppColors.divider)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.textPrimary.withValues(alpha: 0.08),
+            blurRadius: 24,
+            offset: const Offset(0, -6),
+          ),
+        ],
       ),
       child: child,
     ),

@@ -69,7 +69,7 @@ class _MemberFormState extends State<_MemberForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(child: MemberAvatar(preview, size: 76)),
+          Center(child: MemberAvatar(preview, size: 65.5)),
           const SizedBox(height: 24),
           const SheetLabel('Name'),
           TextFormField(
@@ -78,7 +78,7 @@ class _MemberFormState extends State<_MemberForm> {
             textCapitalization: TextCapitalization.words,
             onChanged: (_) => setState(() {}),
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),
@@ -141,7 +141,7 @@ class _ColorDot extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           child: selected
-              ? const Icon(Icons.check_rounded, color: Colors.white, size: 18)
+              ? const Icon(Icons.check_rounded, color: Colors.white, size: 15.5)
               : null,
         ),
       ),

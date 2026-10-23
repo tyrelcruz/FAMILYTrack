@@ -1,4 +1,5 @@
 import 'package:finance_tracker/core/theme/app_colors.dart';
+import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 /// White rounded card with a title and an "Add" action, styled like the
@@ -22,6 +23,7 @@ class SectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(26),
+        border: Border.all(color: AppColors.divider),
         boxShadow: AppColors.softShadow,
       ),
       child: Column(
@@ -31,11 +33,13 @@ class SectionCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  title,
+                  title.toUpperCase(),
                   style: const TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.3,
+                    fontFamily: AppTheme.displayFont,
+                    fontFamilyFallback: AppTheme.displayFallback,
+                    fontSize: 19,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.3,
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -49,16 +53,16 @@ class SectionCard extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.add_rounded,
-                        size: 20,
-                        color: AppColors.textSecondary,
+                        size: 17,
+                        color: AppColors.tealDark,
                       ),
                       SizedBox(width: 4),
                       Text(
                         'Add',
                         style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.tealDark,
                         ),
                       ),
                     ],

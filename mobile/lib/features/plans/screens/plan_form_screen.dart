@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'package:finance_tracker/core/widgets/breakdown_layout.dart';
 import 'package:finance_tracker/core/theme/app_theme.dart';
 import 'package:finance_tracker/core/theme/app_colors.dart';
 import 'package:finance_tracker/core/utils/formatters.dart';
@@ -23,7 +24,7 @@ import 'package:finance_tracker/features/transactions/models/payment_method.dart
 
 const _navy = AppColors.textPrimary;
 const _blue = AppColors.blue;
-const _border = Color(0xFFE2E2EE);
+const _border = AppColors.divider;
 
 /// The three tabs; Custom covers a whole month or any other dates.
 enum _Mode { trip, event, custom }
@@ -284,7 +285,7 @@ class _PlanFormScreenState extends State<PlanFormScreen> {
         statusBarColor: Colors.transparent,
       ),
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: Colors.white,
         bottomNavigationBar: SafeArea(
           minimum: const EdgeInsets.only(bottom: 8),
           child: Padding(
@@ -298,374 +299,384 @@ class _PlanFormScreenState extends State<PlanFormScreen> {
             ),
           ),
         ),
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
-                child: Row(
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: TextButton.styleFrom(foregroundColor: _blue),
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(fontSize: 16),
+        body: PatchBackdrop.behind(
+          SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+                  child: Row(
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(foregroundColor: _blue),
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(fontSize: 14),
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        _editing ? 'Edit Plan' : 'Create Plan',
-                        textAlign: TextAlign.center,
+                      Expanded(
+                        child: Text(
+                          _editing ? 'EDIT PLAN' : 'CREATE PLAN',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontFamily: AppTheme.displayFont,
+                            fontFamilyFallback: AppTheme.displayFallback,
+                            fontSize: 19,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.3,
+                            color: _navy,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: _saving ? null : _save,
+                        style: TextButton.styleFrom(foregroundColor: _blue),
+                        child: const Text(
+                          'Save',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                    children: [
+                      _ModeTabs(
+                        value: _mode,
+                        onChanged: (m) => setState(() => _mode = m),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        switch (_mode) {
+                          _Mode.trip => 'Where to?',
+                          _Mode.event => 'What’s the occasion?',
+                          _Mode.custom => 'What’s it for?',
+                        },
                         style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
+                          fontFamily: AppTheme.displayFont,
+                          fontFamilyFallback: AppTheme.displayFallback,
+                          fontSize: 26.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.2,
                           color: _navy,
                         ),
                       ),
-                    ),
-                    TextButton(
-                      onPressed: _saving ? null : _save,
-                      style: TextButton.styleFrom(foregroundColor: _blue),
-                      child: const Text(
-                        'Save',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  keyboardDismissBehavior:
-                      ScrollViewKeyboardDismissBehavior.onDrag,
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-                  children: [
-                    _ModeTabs(
-                      value: _mode,
-                      onChanged: (m) => setState(() => _mode = m),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      switch (_mode) {
-                        _Mode.trip => 'Where to?',
-                        _Mode.event => 'What’s the occasion?',
-                        _Mode.custom => 'What’s it for?',
-                      },
-                      style: const TextStyle(
-                        fontFamily: AppTheme.displayFont,
-                        fontFamilyFallback: AppTheme.displayFallback,
-                        fontSize: 31,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.2,
-                        color: _navy,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    if (hasPlace) ...[
-                      _Box(
-                        child: TextField(
-                          controller: _search,
-                          focusNode: _searchFocus,
-                          textCapitalization: TextCapitalization.words,
-                          textInputAction: TextInputAction.search,
-                          onSubmitted: (v) {
-                            if (v.trim().isNotEmpty) {
-                              _choosePlace(
-                                results.isNotEmpty
-                                    ? results.first.label
-                                    : v.trim(),
-                              );
-                            }
-                          },
-                          style: _fieldText,
-                          decoration: _input(
-                            hint: _mode == _Mode.trip
-                                ? 'Search destination...'
-                                : 'Search venue or city...',
-                            icon: Icons.search_rounded,
-                          ),
-                        ),
-                      ),
-                      if (query.isNotEmpty)
-                        _SearchResults(
-                          results: results,
-                          query: exact ? null : query,
-                          onPick: _choosePlace,
-                        ),
-                      if (_place.isNotEmpty) ...[
-                        _Label(_mode == _Mode.trip ? 'Destination' : 'Venue'),
-                        _PlaceCard(
-                          place: _place,
-                          onChange: () {
-                            setState(() => _place = '');
-                            _searchFocus.requestFocus();
-                          },
-                        ),
-                      ],
-                    ],
-                    const _Label('Name'),
-                    _Box(
-                      child: TextField(
-                        controller: _name,
-                        textCapitalization: TextCapitalization.sentences,
-                        onChanged: (_) => _nameTouched = true,
-                        style: _fieldText,
-                        decoration: _input(
-                          hint: switch (_mode) {
-                            _Mode.trip => 'e.g. Tokyo trip',
-                            _Mode.event => 'e.g. Lola’s 80th birthday',
-                            _Mode.custom => 'e.g. November budget',
-                          },
-                          icon: Icons.edit_outlined,
-                        ),
-                      ),
-                    ),
-                    if (_mode == _Mode.custom) ...[
-                      const SizedBox(height: 12),
-                      _Box(
-                        child: SwitchListTile.adaptive(
-                          value: _wholeMonth,
-                          onChanged: (v) => setState(() => _wholeMonth = v),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                          ),
-                          title: const Text(
-                            'A whole month',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: _navy,
-                            ),
-                          ),
-                          subtitle: const Text(
-                            'e.g. the family’s November budget',
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              color: AppColors.textMuted,
+                      const SizedBox(height: 14),
+                      if (hasPlace) ...[
+                        _Box(
+                          child: TextField(
+                            controller: _search,
+                            focusNode: _searchFocus,
+                            textCapitalization: TextCapitalization.words,
+                            textInputAction: TextInputAction.search,
+                            onSubmitted: (v) {
+                              if (v.trim().isNotEmpty) {
+                                _choosePlace(
+                                  results.isNotEmpty
+                                      ? results.first.label
+                                      : v.trim(),
+                                );
+                              }
+                            },
+                            style: _fieldText,
+                            decoration: _input(
+                              hint: _mode == _Mode.trip
+                                  ? 'Search destination...'
+                                  : 'Search venue or city...',
+                              icon: Icons.search_rounded,
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                    _Label(
-                      _mode == _Mode.custom && _wholeMonth ? 'Month' : 'Dates',
-                    ),
-                    if (_mode == _Mode.custom && _wholeMonth)
-                      _MonthPicker(
-                        month: _month,
-                        onChanged: (m) => setState(() => _month = m),
-                      )
-                    else
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _DatePill(
-                              date: _range.start,
-                              onTap: _pickRange,
-                            ),
+                        if (query.isNotEmpty)
+                          _SearchResults(
+                            results: results,
+                            query: exact ? null : query,
+                            onPick: _choosePlace,
                           ),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: Icon(
-                              Icons.arrow_forward_rounded,
-                              color: _blue,
-                              size: 18,
-                            ),
-                          ),
-                          Expanded(
-                            child: _DatePill(
-                              date: _range.end,
-                              onTap: _pickRange,
-                            ),
+                        if (_place.isNotEmpty) ...[
+                          _Label(_mode == _Mode.trip ? 'Destination' : 'Venue'),
+                          _PlaceCard(
+                            place: _place,
+                            onChange: () {
+                              setState(() => _place = '');
+                              _searchFocus.requestFocus();
+                            },
                           ),
                         ],
-                      ),
-                    const _Label('Budget', optional: true),
-                    if (!_splitWallets)
+                      ],
+                      const _Label('Name'),
                       _Box(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _budget,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.allow(
-                                    RegExp(r'^\d*\.?\d{0,2}'),
-                                  ),
-                                ],
-                                style: _fieldText,
-                                decoration: _input(
-                                  hint: '₱0',
-                                  icon: Icons.account_balance_wallet_outlined,
-                                ).copyWith(prefixText: '₱ '),
-                              ),
-                            ),
-                            _WalletMenu(
-                              value: _wallet,
-                              onChanged: (m) => setState(() => _wallet = m),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      _Box(
-                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
-                        child: Column(
-                          children: [
-                            for (final m in PaymentMethod.values) ...[
-                              _FundRow(method: m, controller: _funds[m]!),
-                              const SizedBox(height: 8),
-                            ],
-                            const Divider(color: AppColors.divider),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 6),
-                              child: Row(
-                                children: [
-                                  const Text(
-                                    'Total budget',
-                                    style: TextStyle(
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    formatAmount(total),
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w800,
-                                      color: _navy,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        onPressed: () => setState(() {
-                          // Carry the amount over when switching views.
-                          if (!_splitWallets) {
-                            _funds[_wallet]!.text = _budget.text;
-                          } else {
-                            _budget.text = total > 0 ? _plain(total) : '';
-                          }
-                          _splitWallets = !_splitWallets;
-                        }),
-                        style: TextButton.styleFrom(foregroundColor: _blue),
-                        icon: Icon(
-                          _splitWallets
-                              ? Icons.unfold_less_rounded
-                              : Icons.call_split_rounded,
-                          size: 18,
-                        ),
-                        label: Text(
-                          _splitWallets
-                              ? 'Keep it in one wallet'
-                              : 'Split across wallets',
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ),
-                    _Label(_mode == _Mode.trip ? 'Who’s going' : 'Who’s in'),
-                    _Box(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              for (final m in members)
-                                MemberChip(
-                                  member: m,
-                                  selected: _selected.contains(m.id),
-                                  onTap: () => setState(
-                                    () => _selected.contains(m.id)
-                                        ? _selected.remove(m.id)
-                                        : _selected.add(m.id!),
-                                  ),
-                                ),
-                              _AddPeopleChip(onTap: _addPeople),
-                            ],
+                        child: TextField(
+                          controller: _name,
+                          textCapitalization: TextCapitalization.sentences,
+                          onChanged: (_) => _nameTouched = true,
+                          style: _fieldText,
+                          decoration: _input(
+                            hint: switch (_mode) {
+                              _Mode.trip => 'e.g. Tokyo trip',
+                              _Mode.event => 'e.g. Lola’s 80th birthday',
+                              _Mode.custom => 'e.g. November budget',
+                            },
+                            icon: Icons.edit_outlined,
                           ),
-                          if (members.length < 2) ...[
-                            const SizedBox(height: 10),
-                            const Text(
-                              'Just you so far — add the friends or family '
-                              'coming along.',
+                        ),
+                      ),
+                      if (_mode == _Mode.custom) ...[
+                        const SizedBox(height: 12),
+                        _Box(
+                          child: SwitchListTile.adaptive(
+                            value: _wholeMonth,
+                            onChanged: (v) => setState(() => _wholeMonth = v),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                            ),
+                            title: const Text(
+                              'A whole month',
                               style: TextStyle(
                                 fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: _navy,
+                              ),
+                            ),
+                            subtitle: const Text(
+                              'e.g. the family’s November budget',
+                              style: TextStyle(
+                                fontSize: 11,
                                 color: AppColors.textMuted,
                               ),
                             ),
+                          ),
+                        ),
+                      ],
+                      _Label(
+                        _mode == _Mode.custom && _wholeMonth
+                            ? 'Month'
+                            : 'Dates',
+                      ),
+                      if (_mode == _Mode.custom && _wholeMonth)
+                        _MonthPicker(
+                          month: _month,
+                          onChanged: (m) => setState(() => _month = m),
+                        )
+                      else
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _DatePill(
+                                date: _range.start,
+                                onTap: _pickRange,
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              child: Icon(
+                                Icons.arrow_forward_rounded,
+                                color: _blue,
+                                size: 15.5,
+                              ),
+                            ),
+                            Expanded(
+                              child: _DatePill(
+                                date: _range.end,
+                                onTap: _pickRange,
+                              ),
+                            ),
                           ],
-                          const SizedBox(height: 14),
-                          SegmentedPill<SplitMode>(
-                            value: _split,
-                            onChanged: (s) => setState(() => _split = s),
-                            options: const [
-                              SegmentOption(SplitMode.equal, 'Split equally'),
-                              SegmentOption(SplitMode.custom, 'Custom'),
+                        ),
+                      const _Label('Budget', optional: true),
+                      if (!_splitWallets)
+                        _Box(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _budget,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp(r'^\d*\.?\d{0,2}'),
+                                    ),
+                                  ],
+                                  style: _fieldText,
+                                  decoration: _input(
+                                    hint: '₱0',
+                                    icon: Icons.account_balance_wallet_outlined,
+                                  ).copyWith(prefixText: '₱ '),
+                                ),
+                              ),
+                              _WalletMenu(
+                                value: _wallet,
+                                onChanged: (m) => setState(() => _wallet = m),
+                              ),
                             ],
                           ),
-                          const SizedBox(height: 6),
-                          for (final m in members)
-                            if (_selected.contains(m.id))
-                              _ShareRow(
-                                member: m,
-                                equalAmount: _split == SplitMode.equal
-                                    ? equal[m.id] ?? 0
-                                    : null,
-                                controller: _split == SplitMode.custom
-                                    ? _shareController(m.id!)
-                                    : null,
+                        )
+                      else
+                        _Box(
+                          padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+                          child: Column(
+                            children: [
+                              for (final m in PaymentMethod.values) ...[
+                                _FundRow(method: m, controller: _funds[m]!),
+                                const SizedBox(height: 8),
+                              ],
+                              const Divider(color: AppColors.divider),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Text(
+                                      'Total budget',
+                                      style: TextStyle(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      formatAmount(total),
+                                      style: const TextStyle(
+                                        fontSize: 15.5,
+                                        fontWeight: FontWeight.w800,
+                                        color: _navy,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                          if (_split == SplitMode.custom && ids.isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            _AssignedStatus(total: total, assigned: assigned),
+                            ],
+                          ),
+                        ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          onPressed: () => setState(() {
+                            // Carry the amount over when switching views.
+                            if (!_splitWallets) {
+                              _funds[_wallet]!.text = _budget.text;
+                            } else {
+                              _budget.text = total > 0 ? _plain(total) : '';
+                            }
+                            _splitWallets = !_splitWallets;
+                          }),
+                          style: TextButton.styleFrom(foregroundColor: _blue),
+                          icon: Icon(
+                            _splitWallets
+                                ? Icons.unfold_less_rounded
+                                : Icons.call_split_rounded,
+                            size: 15.5,
+                          ),
+                          label: Text(
+                            _splitWallets
+                                ? 'Keep it in one wallet'
+                                : 'Split across wallets',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                      _Label(_mode == _Mode.trip ? 'Who’s going' : 'Who’s in'),
+                      _Box(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                for (final m in members)
+                                  MemberChip(
+                                    member: m,
+                                    selected: _selected.contains(m.id),
+                                    onTap: () => setState(
+                                      () => _selected.contains(m.id)
+                                          ? _selected.remove(m.id)
+                                          : _selected.add(m.id!),
+                                    ),
+                                  ),
+                                _AddPeopleChip(onTap: _addPeople),
+                              ],
+                            ),
+                            if (members.length < 2) ...[
+                              const SizedBox(height: 10),
+                              const Text(
+                                'Just you so far — add the friends or family '
+                                'coming along.',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textMuted,
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: 14),
+                            SegmentedPill<SplitMode>(
+                              value: _split,
+                              onChanged: (s) => setState(() => _split = s),
+                              options: const [
+                                SegmentOption(SplitMode.equal, 'Split equally'),
+                                SegmentOption(SplitMode.custom, 'Custom'),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            for (final m in members)
+                              if (_selected.contains(m.id))
+                                _ShareRow(
+                                  member: m,
+                                  equalAmount: _split == SplitMode.equal
+                                      ? equal[m.id] ?? 0
+                                      : null,
+                                  controller: _split == SplitMode.custom
+                                      ? _shareController(m.id!)
+                                      : null,
+                                ),
+                            if (_split == SplitMode.custom &&
+                                ids.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              _AssignedStatus(total: total, assigned: assigned),
+                            ],
                           ],
-                        ],
-                      ),
-                    ),
-                    const _Label('Description', optional: true),
-                    _Box(
-                      child: TextField(
-                        controller: _description,
-                        minLines: 3,
-                        maxLines: 6,
-                        textCapitalization: TextCapitalization.sentences,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          height: 1.45,
-                          color: AppColors.textPrimary,
-                        ),
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.all(16),
-                          hintText:
-                              'e.g. Let’s explore Tokyo! Food, culture and '
-                              'adventures.',
-                          hintStyle: TextStyle(color: AppColors.textMuted),
                         ),
                       ),
-                    ),
-                  ],
+                      const _Label('Description', optional: true),
+                      _Box(
+                        child: TextField(
+                          controller: _description,
+                          minLines: 3,
+                          maxLines: 6,
+                          textCapitalization: TextCapitalization.sentences,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            height: 1.45,
+                            color: AppColors.textPrimary,
+                          ),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.all(16),
+                            hintText:
+                                'e.g. Let’s explore Tokyo! Food, culture and '
+                                'adventures.',
+                            hintStyle: TextStyle(color: AppColors.textMuted),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -674,7 +685,7 @@ class _PlanFormScreenState extends State<PlanFormScreen> {
 }
 
 const _fieldText = TextStyle(
-  fontSize: 15.5,
+  fontSize: 13.5,
   fontWeight: FontWeight.w600,
   color: AppColors.textPrimary,
 );
@@ -689,7 +700,7 @@ InputDecoration _input({required String hint, required IconData icon}) =>
       ),
       prefixIcon: Padding(
         padding: const EdgeInsets.only(left: 16, right: 10),
-        child: Icon(icon, color: _blue, size: 22),
+        child: Icon(icon, color: _blue, size: 19),
       ),
       prefixIconConstraints: const BoxConstraints(),
       contentPadding: const EdgeInsets.symmetric(vertical: 18),
@@ -738,7 +749,7 @@ class _Label extends StatelessWidget {
         ],
       ),
       style: const TextStyle(
-        fontSize: 15.5,
+        fontSize: 13.5,
         fontWeight: FontWeight.w600,
         color: _navy,
       ),
@@ -765,15 +776,15 @@ class _ModeTabs extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(22),
-              color: selected ? AppColors.lime : null,
+              color: selected ? AppColors.mint : null,
             ),
             alignment: Alignment.center,
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 15,
+                fontSize: 13,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                color: selected ? AppColors.forest : _navy,
+                color: selected ? AppColors.tealDark : AppColors.textSecondary,
               ),
             ),
           ),
@@ -834,7 +845,7 @@ class _SearchResults extends StatelessWidget {
               title: Text(
                 d.label,
                 style: const TextStyle(
-                  fontSize: 15,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: _navy,
                 ),
@@ -844,7 +855,7 @@ class _SearchResults extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 12.5,
+                  fontSize: 11,
                   color: AppColors.textMuted,
                 ),
               ),
@@ -864,7 +875,7 @@ class _SearchResults extends StatelessWidget {
               title: Text(
                 'Use “$query”',
                 style: const TextStyle(
-                  fontSize: 15,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: _navy,
                 ),
@@ -913,7 +924,7 @@ class _PlaceCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: _navy,
                     ),
@@ -924,7 +935,7 @@ class _PlaceCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 13,
+                      fontSize: 11,
                       height: 1.35,
                       color: AppColors.textMuted,
                     ),
@@ -936,7 +947,7 @@ class _PlaceCard extends StatelessWidget {
             const Icon(
               Icons.keyboard_double_arrow_right_rounded,
               color: _blue,
-              size: 22,
+              size: 19,
             ),
           ],
         ),
@@ -960,7 +971,7 @@ class _DatePill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today_outlined, color: _blue, size: 19),
+            const Icon(Icons.calendar_today_outlined, color: _blue, size: 16.5),
             const SizedBox(width: 10),
             Expanded(
               child: FittedBox(
@@ -969,7 +980,7 @@ class _DatePill extends StatelessWidget {
                 child: Text(
                   formatDayShortYear(date),
                   style: const TextStyle(
-                    fontSize: 15,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: _navy,
                   ),
@@ -1004,7 +1015,7 @@ class _MonthPicker extends StatelessWidget {
               formatMonth(month),
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 15.5,
+                fontSize: 13.5,
                 fontWeight: FontWeight.w600,
                 color: _navy,
               ),
@@ -1037,7 +1048,7 @@ class _WalletMenu extends StatelessWidget {
           value: m,
           child: Row(
             children: [
-              Icon(m.icon, color: m.color, size: 20),
+              Icon(m.icon, color: m.color, size: 17),
               const SizedBox(width: 10),
               Text(m.label),
             ],
@@ -1049,12 +1060,12 @@ class _WalletMenu extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(value.icon, color: value.color, size: 18),
+          Icon(value.icon, color: value.color, size: 15.5),
           const SizedBox(width: 6),
           Text(
             value.label,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               color: _navy,
             ),
@@ -1083,7 +1094,7 @@ class _MoneyField extends StatelessWidget {
         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
       ],
       style: const TextStyle(
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
       ),
@@ -1114,14 +1125,14 @@ class _FundRow extends StatelessWidget {
           color: method.tint,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Icon(method.icon, color: method.color, size: 22),
+        child: Icon(method.icon, color: method.color, size: 19),
       ),
       const SizedBox(width: 14),
       Expanded(
         child: Text(
           method.label,
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.w500,
             color: AppColors.textPrimary,
           ),
@@ -1148,7 +1159,7 @@ class _ShareRow extends StatelessWidget {
     padding: const EdgeInsets.symmetric(vertical: 6),
     child: Row(
       children: [
-        MemberAvatar(member, size: 40),
+        MemberAvatar(member, size: 34.5),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
@@ -1156,7 +1167,7 @@ class _ShareRow extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w500,
               color: AppColors.textPrimary,
             ),
@@ -1168,7 +1179,7 @@ class _ShareRow extends StatelessWidget {
           Text(
             formatAmount(equalAmount ?? 0),
             style: const TextStyle(
-              fontSize: 17,
+              fontSize: 14.5,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
             ),
@@ -1215,13 +1226,13 @@ class _AssignedStatus extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: color),
+          Icon(icon, size: 17, color: color),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
                 color: color,
               ),
@@ -1251,12 +1262,12 @@ class _AddPeopleChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.person_add_alt_1_rounded, size: 18, color: _blue),
+            Icon(Icons.person_add_alt_1_rounded, size: 15.5, color: _blue),
             SizedBox(width: 6),
             Text(
               'Add people',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: _blue,
               ),
